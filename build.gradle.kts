@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.0-RC"
+    alias(libs.plugins.kotlin.jvm)
     application
 }
 
@@ -10,22 +10,17 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
-    maven(url = "https://oss.sonatype.org/content/repositories/snapshots/")
 }
 
 dependencies {
-    implementation("com.github.ajalt.clikt:clikt:4.0.0.198-SNAPSHOT")
+    implementation(libs.clikt)
 
-    implementation("org.jdom:jdom2:2.0.6.1")
-    implementation("jaxen:jaxen:2.0.0")
+    implementation(libs.jdom2)
+    implementation(libs.jaxen)
 
-    implementation("net.sf.kxml:kxml2:2.3.0")
+    implementation(libs.kxml2)
 
-    implementation("org.slf4j:slf4j-api:1.7.26")
-    implementation("org.slf4j:slf4j-simple:1.7.26")
-
-    compileOnly("org.projectlombok:lombok:1.18.28")
-    annotationProcessor("org.projectlombok:lombok:1.18.28")
+    implementation(libs.bundles.slf4j)
 
     testImplementation(kotlin("test"))
 }

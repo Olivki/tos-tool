@@ -73,7 +73,6 @@ class IpfUnpackCommand : CliktCommand(name = "unpack") {
         val unpackDuration = measureTime {
             var archiveDirectory: Path? = null
             var ipf: IpfFile? = null
-            // TODO: rename to 'fileCount'
             var fileCount: UShort
             FileChannel.open(file, READ).use { channel ->
                 val buffer = channel.map(READ_ONLY, 0, file.fileSize()).order(ByteOrder.LITTLE_ENDIAN)

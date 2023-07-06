@@ -1,0 +1,17 @@
+[versions]
+kotlin = "1.9.0-RC"
+slf4j = "1.7.26"
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+
+[libraries]
+clikt = { group = "com.github.ajalt.clikt", name = "clikt", version = "4.0.0" }
+jdom2 = { group = "org.jdom", name = "jdom2", version = "2.0.6.1" }
+jaxen = { group = "jaxen", name = "jaxen", version = "2.0.0" }
+kxml2 = { group = "net.sf.kxml", name = "kxml2", version = "2.3.0" }
+slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version.ref = "slf4j" }
+
+[bundles]
+slf4j = ["slf4j-api", "slf4j-simple"]
