@@ -3,24 +3,25 @@ plugins {
     application
 }
 
-group = "net.ormr.tos"
-version = "1.0-SNAPSHOT"
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
+    implementation(project(":tos-ies"))
+    implementation(project(":tos-ipf"))
+    implementation(project(":tos-xac"))
+
     implementation(libs.clikt)
 
     implementation(libs.jdom2)
     implementation(libs.jaxen)
 
     implementation(libs.kxml2)
-
+    
     implementation(libs.bundles.slf4j)
 
     testImplementation(kotlin("test"))
+}
+
+application {
+    mainClass.set("net.ormr.tos.cli.MainKt")
 }
 
 tasks {
@@ -32,15 +33,5 @@ tasks {
         kotlinOptions {
             jvmTarget = "17"
         }
-    }
-}
-
-application {
-    mainClass.set("MainKt")
-}
-
-allprojects {
-    repositories {
-        mavenCentral()
     }
 }

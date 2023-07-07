@@ -1,5 +1,5 @@
 [versions]
-kotlin = "1.9.0-RC"
+kotlin = "1.9.0"
 slf4j = "1.7.26"
 
 [plugins]
