@@ -36,18 +36,12 @@ class IesUnpackCommand : CliktCommand(name = "unpack") {
     @OptIn(ExperimentalPathApi::class)
     override fun run() {
         output.createDirectories()
-        if (isDirectory) {
-            for (path in input.walk()) {
-                if (path.isRegularFile()) writeFile(path)
-            }
-        } else {
-            writeFile(input)
-        }
+        input.walk().forEach(::writeFile)
     }
 
     private fun writeFile(input: Path) {
         val table = readIesTable(input)
-        format.encodeToFile(output / "${table.header.name}.xml", table)
+        format.encodeToFile(output / "${input.nameWithoutExtension}.xml", table)
     }
 
     private fun readIesTable(input: Path): IesTable = FileChannel.open(input, READ).use { channel ->
@@ -55,12 +49,6 @@ class IesUnpackCommand : CliktCommand(name = "unpack") {
         val buffer = channel.map(READ_ONLY, 0, input.fileSize()).order(ByteOrder.LITTLE_ENDIAN)
         val table = IesTable()
         table.read(buffer)
-        /*        println(table.rows.map { it.gamer })
-                println(table.rows.map { it.gamer }.sumOf { it.dataSize + it.keyLength + it.stringDataCount })
-                println("sum rows: ${table.rows.sumOf { it.elementSize }}")
-                *//*println("${table.header.rowCount} : ${table.header.columnCount}")*//*
-        println("${table.header.rowSize} : ${table.header.columnSize}")*/
-        //echo("${table.elementSize}")
         table
     }
 }
