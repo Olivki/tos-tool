@@ -1,3 +1,5 @@
+@file:Suppress("IMPLICIT_CAST_TO_ANY")
+
 package net.ormr.tos.ies.format
 
 import net.ormr.tos.ies.*
@@ -11,6 +13,7 @@ import org.jdom2.Element
 import org.jdom2.xpath.XPathHelper.getAbsolutePath
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption.*
+import java.util.*
 
 // TODO: manually serialize and deserialize this instead of using XStream,
 //       because XStream probably doesn't play nicely with Kotlin
@@ -23,21 +26,18 @@ data object IesXmlSerializer : IesSerializer {
 
     private fun createDocument(table: IesTable): Document = createDocument("table") {
         setAttribute("name", table.header.name)
-        setAttribute("flag", table.header.flag.toString())
+        setAttribute("flag1", table.header.flag1.toString())
         setAttribute("flag2", table.header.flag2.toString())
         setAttribute("unkColumns", table.header.unkColumns.toString())
-        setAttribute("rows", table.header.rowCount.toString())
         element("columns") {
             for (column in table.columns) {
                 element("column") {
                     setAttribute("name", column.name)
-                    setAttribute("name2", column.name2)
+                    setAttribute("key", column.key)
                     setAttribute("type", column.type.name.lowercase())
-                    setAttribute("dummy", column.dummy.toString())
-                    setAttribute("pos", column.pos.toString())
-                    /*setAttribute("unk1", column.unk1.toString())
+                    setAttribute("unk1", column.unk1.toString())
                     setAttribute("unk2", column.unk2.toString())
-                    setAttribute("unk3", column.unk3.toString())*/
+                    setAttribute("pos", column.pos.toString())
                 }
             }
         }
@@ -52,9 +52,15 @@ data object IesXmlSerializer : IesSerializer {
                         } else {
                             element("data") {
                                 val column = data.column
-                                setAttribute("ref", column.name2)
-                                setAttribute("value", data.data.toString())
-                                //setAttribute("type", column.type.name.lowercase())
+                                setAttribute("ref", column.key)
+                                val valueAttr = when (data.column.type) {
+                                    IesDataType.Float32 -> {
+                                        val value = data.data as Float
+                                        if (value % 1 != 0F) value.toString() else value.toInt().toString()
+                                    }
+                                    IesDataType.String1, IesDataType.String2 -> data.data.toString()
+                                }
+                                setAttribute("value", valueAttr)
                                 setAttribute("flag", data.flag.toString())
                             }
                         }
@@ -70,7 +76,7 @@ data object IesXmlSerializer : IesSerializer {
         val table = IesTable()
         val header = IesHeader(table).apply {
             name = root.attr("name")
-            flag = root.intAttr("flag")
+            flag1 = root.intAttr("flag1")
             flag2 = root.shortAttr("flag2")
             unkColumns = root.shortAttr("unkColumns")
         }
@@ -81,20 +87,21 @@ data object IesXmlSerializer : IesSerializer {
         for (columnElement in root.child("columns").getChildren("column")) {
             val column = IesColumn(table).apply {
                 name = columnElement.attr("name")
-                name2 = columnElement.attr("name2")
+                key = columnElement.attr("name2")
                 type = when (val typeName = columnElement.attr("type")) {
-                    "int32" -> IesDataType.Int32
+                    "float32" -> IesDataType.Float32
                     "string1" -> IesDataType.String1
                     "string2" -> IesDataType.String2
                     else -> error("Unknown column type $typeName at ${getAbsolutePath(columnElement)}")
                 }
-                dummy = columnElement.intAttr("dummy")
+                unk1 = columnElement.shortAttr("unk1")
+                unk2 = columnElement.shortAttr("unk2")
                 pos = columnElement.shortAttr("pos")
             }
             if (column.name in mappedColumns) {
                 error("Duplicate column name ${column.name} at ${getAbsolutePath(columnElement)}")
             }
-            mappedColumns[column.name2] = column
+            mappedColumns[column.key] = column
             columns += column
         }
 
@@ -111,7 +118,7 @@ data object IesXmlSerializer : IesSerializer {
                         flag = dataElement.byteAttr("flag")
                         val rawData = dataElement.attr("value")
                         data = when (column.type) {
-                            IesDataType.Int32 -> rawData.toInt()
+                            IesDataType.Float32 -> rawData.toFloat()
                             IesDataType.String1, IesDataType.String2 -> rawData
                         }
                     }
@@ -131,7 +138,7 @@ data object IesXmlSerializer : IesSerializer {
             fileSize = columnSize + rowSize
             rowCount = rows.size.toShort()
             columnCount = columns.size.toShort()
-            intColumns = columns.count { it.type is IesDataType.Int32 }.toShort()
+            intColumns = columns.count { it.type is IesDataType.Float32 }.toShort()
             stringColumns = columns.count { it.type is IesDataType.String }.toShort()
         }
         //println(header)

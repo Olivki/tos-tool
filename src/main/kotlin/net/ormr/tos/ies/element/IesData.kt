@@ -12,7 +12,7 @@ class IesData(val column: IesColumn) : IesElement {
         get() = column.type.getElementSize(data)
 
     val isIntType: Boolean
-        get() = column.type is IesDataType.Int32
+        get() = column.type is IesDataType.Float32
 
     val isStringType: Boolean
         get() = column.type is IesDataType.String

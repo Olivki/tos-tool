@@ -1,7 +1,7 @@
 package net.ormr.tos.ies.element
 
 import net.ormr.tos.ies.IesDataReader
-import net.ormr.tos.ies.IesDataReader.INT
+import net.ormr.tos.ies.IesDataReader.FLOAT
 import net.ormr.tos.ies.IesDataReader.STRING
 import net.ormr.tos.ies.IesDataType
 import net.ormr.tos.ies.IesUtil.getStringWithSize
@@ -26,7 +26,7 @@ class IesRow(private val table: IesTable) : IesElement {
         id = buffer.getInt()
         key = buffer.getStringWithSize().shiftBits()
         data = arrayOfNulls(table.header.columnCount.toInt())
-        readData<IesDataType.Int32>(INT, table.header.intColumns.toInt(), buffer)
+        readData<IesDataType.Float32>(FLOAT, table.header.intColumns.toInt(), buffer)
         readData<IesDataType.String>(STRING, table.header.stringColumns.toInt(), buffer)
         for (iesData in data) {
             // the code is a bit ambiguous about whether 'data' should actually contain nulls or not
@@ -57,7 +57,7 @@ class IesRow(private val table: IesTable) : IesElement {
     override fun write(buffer: ByteBuffer) {
         buffer.putInt(id)
         buffer.putStringWithSize(key.shiftBits())
-        writeData<IesDataType.Int32>(buffer)
+        writeData<IesDataType.Float32>(buffer)
         writeData<IesDataType.String>(buffer)
         for (iesData in data) {
             requireNotNull(iesData)

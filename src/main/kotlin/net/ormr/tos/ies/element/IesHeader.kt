@@ -8,7 +8,7 @@ import kotlin.properties.Delegates
 
 class IesHeader(private val table: IesTable) : IesElement {
     lateinit var name: String
-    var flag: Int by Delegates.notNull()
+    var flag1: Int by Delegates.notNull()
     var columnSize: Int by Delegates.notNull()
     var rowSize: Int by Delegates.notNull()
     var fileSize: Int by Delegates.notNull()
@@ -31,7 +31,7 @@ class IesHeader(private val table: IesTable) : IesElement {
     override fun read(buffer: ByteBuffer) {
         name = buffer.getCString() //name, 128 bytes (with null-bytes)
         buffer.position(buffer.position() + 128 - sizeOf(name) - 1) //skip null-bytes
-        flag = buffer.getInt()
+        flag1 = buffer.getInt()
         columnSize = buffer.getInt()
         rowSize = buffer.getInt()
         fileSize = buffer.getInt()
@@ -49,7 +49,7 @@ class IesHeader(private val table: IesTable) : IesElement {
         val nameBytes = name.toByteArray()
         buffer.put(nameBytes)
         buffer.position(buffer.position() + 128 - nameBytes.size)
-        buffer.putInt(flag)
+        buffer.putInt(flag1)
         buffer.putInt(columnSize)
         buffer.putInt(rowSize)
         buffer.putInt(fileSize)
@@ -67,11 +67,11 @@ class IesHeader(private val table: IesTable) : IesElement {
         rowSize = table.rowsSize
         columnCount = table.columns.size.toShort()
         rowCount = table.rows.size.toShort()
-        intColumns = table.getTypeDataCount<IesDataType.Int32>().toShort()
+        intColumns = table.getTypeDataCount<IesDataType.Float32>().toShort()
         stringColumns = table.getTypeDataCount<IesDataType.String>().toShort()
     }
 
 
     override fun toString(): String =
-        "IesHeader(table=$table, name='$name', flag=$flag, columnSize=$columnSize, rowSize=$rowSize, size=$fileSize, flag2=$flag2, rowCount=$rowCount, columnCount=$columnCount, intColumns=$intColumns, stringColumns=$stringColumns, unkColumns=$unkColumns)"
+        "IesHeader(table=$table, name='$name', flag=$flag1, columnSize=$columnSize, rowSize=$rowSize, size=$fileSize, flag2=$flag2, rowCount=$rowCount, columnCount=$columnCount, intColumns=$intColumns, stringColumns=$stringColumns, unkColumns=$unkColumns)"
 }

@@ -69,6 +69,7 @@ class IpfUnpackCommand : CliktCommand(name = "unpack") {
         pool.shutdown()
     }
 
+    // TODO: there's probably more values that are being read as signed values that should be read as unsigned
     private fun unpack(file: Path) {
         val unpackDuration = measureTime {
             var archiveDirectory: Path? = null

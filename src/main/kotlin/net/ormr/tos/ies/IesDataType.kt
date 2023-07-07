@@ -5,7 +5,6 @@ import net.ormr.tos.ies.IesUtil.getUShort
 import net.ormr.tos.ies.IesUtil.putUString
 import net.ormr.tos.ies.IesUtil.shiftBits
 import java.nio.ByteBuffer
-import kotlin.Int
 import kotlin.Int as KInt
 import kotlin.String as KString
 
@@ -21,20 +20,20 @@ sealed interface IesDataType {
     fun getElementSize(value: Any): KInt
 
     // TODO: unsure if this is actually ints or floats, because they're packed the same way
-    data object Int32 : IesDataType {
+    data object Float32 : IesDataType {
         override val id: Short
             get() = 0
 
         override val name: KString
-            get() = "int32"
+            get() = "float32"
 
-        override fun read(buffer: ByteBuffer): Any = buffer.getInt()
+        override fun read(buffer: ByteBuffer): Any = buffer.getFloat()
 
         override fun write(value: Any, buffer: ByteBuffer) {
-            buffer.putInt(value as Int)
+            buffer.putFloat(value as Float)
         }
 
-        override fun getElementSize(value: Any): KInt = Int.SIZE_BYTES
+        override fun getElementSize(value: Any): KInt = Float.SIZE_BYTES
     }
 
     sealed class String : IesDataType {

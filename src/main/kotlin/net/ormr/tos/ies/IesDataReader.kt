@@ -7,8 +7,8 @@ import java.nio.ByteBuffer
 sealed interface IesDataReader {
     fun read(buffer: ByteBuffer): Any
 
-    data object INT : IesDataReader {
-        override fun read(buffer: ByteBuffer): Any = buffer.getInt()
+    data object FLOAT : IesDataReader {
+        override fun read(buffer: ByteBuffer): Any = buffer.getFloat()
     }
 
     data object STRING : IesDataReader {
