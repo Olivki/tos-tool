@@ -29,11 +29,11 @@ internal data class IesFloat32ValueImpl(
 internal data class IesString1ValueImpl(
     override var data: String,
     override val column: IesColumn<String>,
-    override var flag: Byte,
+    override var flag: Boolean,
 ) : IesString1Value, InternalIesElementImpl
 
 internal data class IesString2ValueImpl(
     override var data: String,
     override val column: IesColumn<String>,
-    override var flag: Byte,
+    override var flag: Boolean,
 ) : IesString2Value, InternalIesElementImpl

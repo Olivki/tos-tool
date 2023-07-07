@@ -27,12 +27,12 @@ internal data class IesTableImpl(
     override val columns: MutableList<IesColumn<*>>,
     override val rows: MutableList<IesRow>,
 ) : IesTable, InternalIesElementImpl {
-    override fun encodeToByteBuffer(): ByteBuffer {
+    override fun toByteBuffer(): ByteBuffer {
         val self = this
         val structTable = IesStructTable {
             this.header = IesStructHeader(this) {
                 this.name = self.header.name
-                this.flag = self.header.flag
+                this.flag1 = self.header.flag1
                 this.flag2 = self.header.flag2
                 this.unkColumns = self.header.unknown
             }
@@ -62,7 +62,9 @@ internal data class IesTableImpl(
                         val structColumn = structColumns.getValue(entry.column.key)
                         IesStructData(structColumn) {
                             this.data = entry.data
-                            this.flag = if (entry is IesStringValue) entry.flag else 0
+                            if (entry is IesStringValue) {
+                                this.flag = entry.flag.toByte()
+                            }
                         }
                     }
                 }
@@ -72,6 +74,14 @@ internal data class IesTableImpl(
         structTable.writeTo(buffer)
         return buffer.flip()
     }
+}
+
+private fun Boolean.toByte(): Byte = if (this) 1 else 0
+
+private fun Byte.toBoolean(): Boolean = when (this) {
+    0.toByte() -> false
+    1.toByte() -> true
+    else -> throw IllegalArgumentException("Byte must be either 0 or 1, but was $this")
 }
 
 @Suppress("UNCHECKED_CAST")
@@ -94,7 +104,7 @@ internal fun IesStructTable.toIesTable(): IesTable {
     return IesTable(
         header = IesHeader(
             name = header.name,
-            flag = header.flag,
+            flag = header.flag1,
             flag2 = header.flag2,
             unknown = header.unkColumns,
         ),
@@ -113,12 +123,12 @@ internal fun IesStructTable.toIesTable(): IesTable {
                         IesType.String1 -> IesString1Value(
                             value = entry.data as String,
                             column = column as IesColumn<String>,
-                            flag = entry.flag,
+                            flag = entry.flag.toBoolean(),
                         )
                         IesType.String2 -> IesString2Value(
                             value = entry.data as String,
                             column = column as IesColumn<String>,
-                            flag = entry.flag,
+                            flag = entry.flag.toBoolean(),
                         )
                     }
                 }.toMutableList(),

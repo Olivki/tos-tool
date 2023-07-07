@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.ies.element
+package net.ormr.tos.cli.ies.serializer
 
-import net.ormr.tos.ies.internal.element.IesHeaderImpl
+import net.ormr.tos.ies.element.IesTable
+import java.nio.file.Path
 
-interface IesHeader : IesElement {
-    var name: String // 128 byte length
-    var flag1: Int
-    var flag2: Short
-    var unknown: Short
+sealed interface IesSerializer {
+    fun encodeToFile(table: IesTable, file: Path)
+
+    fun decodeFromFile(file: Path): IesTable
 }
-
-fun IesHeader(name: String, flag: Int = 0, flag2: Short = 0, unknown: Short = 0): IesHeader =
-    IesHeaderImpl(name, flag, flag2, unknown)

@@ -20,7 +20,7 @@ import net.ormr.tos.ies.element.IesHeader
 
 internal data class IesHeaderImpl(
     override var name: String,
-    override var flag: Int,
+    override var flag1: Int,
     override var flag2: Short,
     override var unknown: Short,
 ) : IesHeader, InternalIesElementImpl

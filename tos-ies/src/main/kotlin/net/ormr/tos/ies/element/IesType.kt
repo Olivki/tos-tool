@@ -18,12 +18,12 @@ package net.ormr.tos.ies.element
 
 import kotlin.String as KString
 
-sealed class IesType<T : Any>(val id: Short) : IesElement {
-    data object Float32 : IesType<Float>(id = 0)
+sealed class IesType<T : Any>(val id: Short, val name: KString) : IesElement {
+    data object Float32 : IesType<Float>(id = 0, name = "float32")
 
-    sealed class String(id: Short) : IesType<KString>(id)
+    sealed class String(id: Short, name: KString) : IesType<KString>(id, name)
 
-    data object String1 : String(id = 1)
+    data object String1 : String(id = 1, name = "string1")
 
-    data object String2 : String(id = 2)
+    data object String2 : String(id = 2, name = "string2")
 }

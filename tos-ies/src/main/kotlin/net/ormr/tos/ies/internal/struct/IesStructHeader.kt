@@ -22,7 +22,7 @@ import java.nio.ByteBuffer
 
 internal class IesStructHeader(val table: IesStructTable) : IesStruct {
     lateinit var name: String // 128 byte length name
-    var flag: Int = 0
+    var flag1: Int = 0
     var columnSize: Int = 0
     var rowSize: Int = 0
     var fileSize: Int = 0
@@ -35,7 +35,7 @@ internal class IesStructHeader(val table: IesStructTable) : IesStruct {
 
     override fun readFrom(buffer: ByteBuffer) {
         name = buffer.getNullTerminatedString(128)
-        flag = buffer.getInt()  // should be 1
+        flag1 = buffer.getInt()  // should be 1
         columnSize = buffer.getInt()
         rowSize = buffer.getInt()
         fileSize = buffer.getInt()
@@ -51,7 +51,7 @@ internal class IesStructHeader(val table: IesStructTable) : IesStruct {
         updateValues()
 
         buffer.putNullTerminatedString(name, 128)
-        buffer.putInt(flag)
+        buffer.putInt(flag1)
         buffer.putInt(columnSize)
         buffer.putInt(rowSize)
         buffer.putInt(fileSize)
@@ -79,7 +79,7 @@ internal class IesStructHeader(val table: IesStructTable) : IesStruct {
 
     override fun getSize(): Int = 128 + (Int.SIZE_BYTES * 4) + (Short.SIZE_BYTES * 6)
     override fun toString(): String =
-        "IesStructHeader(name='$name', flag=$flag, columnSize=$columnSize, rowSize=$rowSize, fileSize=$fileSize, flag2=$flag2, rowCount=$rowCount, columnCount=$columnCount, intColumns=$intColumns, stringColumns=$stringColumns, unkColumns=$unkColumns)"
+        "IesStructHeader(name='$name', flag=$flag1, columnSize=$columnSize, rowSize=$rowSize, fileSize=$fileSize, flag2=$flag2, rowCount=$rowCount, columnCount=$columnCount, intColumns=$intColumns, stringColumns=$stringColumns, unkColumns=$unkColumns)"
 
 
     companion object {

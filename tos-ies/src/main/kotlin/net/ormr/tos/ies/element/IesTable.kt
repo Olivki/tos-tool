@@ -20,6 +20,7 @@ import net.ormr.tos.ies.internal.element.IesTableImpl
 import net.ormr.tos.ies.internal.element.toIesTable
 import net.ormr.tos.ies.internal.struct.IesStructTable
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 interface IesTable : IesElement {
     val header: IesHeader
@@ -29,11 +30,11 @@ interface IesTable : IesElement {
     val name: String
         get() = header.name
 
-    fun encodeToByteBuffer(): ByteBuffer
+    fun toByteBuffer(): ByteBuffer
 
     companion object {
-        fun decodeFromByteBuffer(buffer: ByteBuffer): IesTable = IesStructTable {
-            readFrom(buffer)
+        fun readFromByteBuffer(buffer: ByteBuffer): IesTable = IesStructTable {
+            readFrom(buffer.order(ByteOrder.LITTLE_ENDIAN))
         }.toIesTable()
     }
 }

@@ -37,7 +37,7 @@ fun IesFloat32Value(
 ): IesFloat32Value = IesFloat32ValueImpl(value, column)
 
 sealed interface IesStringValue<IT : IesType<String>> : IesValue<String, IT> {
-    var flag: Byte
+    var flag: Boolean
 }
 
 interface IesString1Value : IesStringValue<IesType.String1> {
@@ -48,7 +48,7 @@ interface IesString1Value : IesStringValue<IesType.String1> {
 fun IesString1Value(
     value: String,
     column: IesColumn<String>,
-    flag: Byte = 0,
+    flag: Boolean = false,
 ): IesString1Value = IesString1ValueImpl(value, column, flag)
 
 interface IesString2Value : IesStringValue<IesType.String2> {
@@ -59,5 +59,5 @@ interface IesString2Value : IesStringValue<IesType.String2> {
 fun IesString2Value(
     value: String,
     column: IesColumn<String>,
-    flag: Byte = 0,
+    flag: Boolean = false,
 ): IesString2Value = IesString2ValueImpl(value, column, flag)

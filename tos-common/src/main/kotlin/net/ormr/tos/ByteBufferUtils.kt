@@ -38,11 +38,26 @@ fun ByteBuffer.getString(length: Int, charset: Charset = Charsets.UTF_8): String
 
 fun ByteBuffer.putString(value: String, charset: Charset = Charsets.UTF_8): ByteBuffer = put(value.toByteArray(charset))
 
+
+/*fun ByteBuffer.getNullTerminatedString(length: Int, charset: Charset = Charsets.UTF_8): String =
+    String(getBytes(length), charset).trimEnd { it == NULL }*/
+
 /**
  * Reads a null-terminated string from the buffer.
  */
-fun ByteBuffer.getNullTerminatedString(length: Int, charset: Charset = Charsets.UTF_8): String =
-    String(getBytes(length), charset).trim { it == NULL }
+fun ByteBuffer.getNullTerminatedString(length: Int): String {
+    var value = getUByte()
+    var count = 0
+    val string = buildString(length) {
+        while (value != 0.toUByte()) {
+            append(value.toInt().toChar())
+            value = getUByte()
+            count++
+        }
+    }
+    position(position() + length - count - 1)
+    return string
+}
 
 /**
  * Writes a string to the buffer, padding it with null characters to the specified [length].

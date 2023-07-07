@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.ies.element
+package net.ormr.tos.cli
 
-import net.ormr.tos.ies.internal.element.IesHeaderImpl
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.mordant.terminal.Terminal
 
-interface IesHeader : IesElement {
-    var name: String // 128 byte length
-    var flag1: Int
-    var flag2: Short
-    var unknown: Short
-}
-
-fun IesHeader(name: String, flag: Int = 0, flag2: Short = 0, unknown: Short = 0): IesHeader =
-    IesHeaderImpl(name, flag, flag2, unknown)
+val CliktCommand.t: Terminal
+    get() = currentContext.terminal
