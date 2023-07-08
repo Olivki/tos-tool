@@ -103,7 +103,7 @@ public class Packer {
                 final OutputStream os;
                 final Deflater deflater = new Deflater(level, true);
                 final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                if (ipfFile.getVersion() >= 11035) {
+                if (ipfFile.getVersion() >= 11035 || ipfFile.getVersion() == 0) {
                     os = new DeflaterOutputStream(new PkwareOutputStream(IpfFile.PASSWORD, baos), deflater);
                 } else {
                     os = new DeflaterOutputStream(baos, deflater);

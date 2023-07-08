@@ -72,3 +72,7 @@ fun ByteBuffer.putUByte(value: UByte): ByteBuffer = put(value.toByte())
 fun ByteBuffer.getUShort(): UShort = getShort().toUShort()
 
 fun ByteBuffer.putUShort(value: UShort): ByteBuffer = putShort(value.toShort())
+
+fun ByteBuffer.getUInt(): UInt = getInt().toUInt()
+
+fun ByteBuffer.putUInt(value: UInt): ByteBuffer = putInt(value.toInt())
