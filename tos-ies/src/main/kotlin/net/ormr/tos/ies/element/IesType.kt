@@ -19,6 +19,8 @@ package net.ormr.tos.ies.element
 import kotlin.String as KString
 
 sealed class IesType<T : Any>(val id: Short, val name: KString) : IesElement {
+    fun isSameTypeAs(other: IesType<*>): Boolean = (this == other) || (this is String && other is String)
+
     data object Float32 : IesType<Float>(id = 0, name = "float32")
 
     sealed class String(id: Short, name: KString) : IesType<KString>(id, name)

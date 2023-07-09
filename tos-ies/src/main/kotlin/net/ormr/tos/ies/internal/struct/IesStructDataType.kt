@@ -32,6 +32,8 @@ sealed class IesStructDataType(val id: Short, val name: KString) {
 
     abstract fun getSizeOf(value: Any): Int
 
+    fun isSameTypeAs(other: IesStructDataType): Boolean = (this == other) || (this is String && other is String)
+
     // TODO: int variants might be unsigned integers?
     data object Float32 : IesStructDataType(id = 0, name = "float32") {
         override fun decodeFrom(buffer: ByteBuffer): Float = buffer.getFloat()

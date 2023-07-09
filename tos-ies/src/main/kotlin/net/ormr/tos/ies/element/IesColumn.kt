@@ -25,6 +25,26 @@ interface IesColumn<T : Any> : IesElement {
     var position: Short
     var unk1: Short
     var unk2: Short
+
+    companion object {
+        val VISUAL_COMPARATOR: Comparator<IesColumn<*>> = Comparator { o1, o2 ->
+            when {
+                o1.position > o2.position -> 1
+                o1.position < o2.position -> -1
+                o1.type.id > o2.type.id -> 1
+                o1.type.id < o2.type.id -> -1
+                else -> 0
+            }
+        }
+
+        val BINARY_COMPARATOR: Comparator<IesColumn<*>> = Comparator { o1, o2 ->
+            when {
+                o1.type.isSameTypeAs(o2.type) -> o1.position.compareTo(o2.position)
+                o1.type.id < o2.type.id -> -1
+                else -> 1
+            }
+        }
+    }
 }
 
 fun <T : Any> IesColumn(

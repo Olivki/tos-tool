@@ -23,60 +23,45 @@ import net.ormr.tos.ies.internal.utf8SizeOf
 import net.ormr.tos.putString
 import net.ormr.tos.putUShort
 import java.nio.ByteBuffer
+import net.ormr.tos.ies.internal.struct.IesStructDataType.Float32 as IesFloat32
+import net.ormr.tos.ies.internal.struct.IesStructDataType.String1 as IesString1
+import net.ormr.tos.ies.internal.struct.IesStructDataType.String2 as IesString2
 
 internal class IesStructRow(val table: IesStructTable) : IesStruct {
     var id: Int = 0
     lateinit var key: String
     lateinit var entries: Array<IesStructData>
 
-    @Suppress("UNCHECKED_CAST")
     override fun readFrom(buffer: ByteBuffer) {
-        id = buffer.getInt()
+        id = buffer.getInt() // TODO: UInt
         key = buffer.getString(length = buffer.getUShort().toInt()).shiftBits()
-        val entries = arrayOfNulls<IesStructData>(table.header.columnCount.toInt())
-        fillEntries<IesStructDataType.Float32>(buffer, table.header.intColumns.toInt(), entries, ByteBuffer::getFloat)
-        fillEntries<IesStructDataType.String>(
-            buffer,
-            table.header.stringColumns.toInt(),
-            entries,
-            IesStructDataType.String1::decodeFrom
-        )
-        for ((i, entry) in entries.withIndex()) {
-            requireNotNull(entry) { "Entry at $i was null" }
-            if (entry.isString) entry.flag = buffer.get()
-        }
-        // we're already checking for nulls (which should never happen) when we set the flags, so this is safe
-        this.entries = entries as Array<IesStructData>
-    }
-
-    private inline fun <reified T : IesStructDataType> fillEntries(
-        buffer: ByteBuffer,
-        max: Int,
-        data: Array<IesStructData?>,
-        readData: (ByteBuffer) -> Any,
-    ) {
-        var i = 0
-        var column = 0
-        while (i < max) {
-            for (j in data.indices) {
-                if (data[j] == null && table.columns[j].type is T) {
-                    column = j
-                    break
+        val entries = mutableListOf<IesStructData>()
+        val sortedColumns = table.sortedColumns
+        for (i in 0..<table.header.columnCount.toInt()) {
+            val column = sortedColumns[i]
+            entries += IesStructData(column) {
+                data = when (column.type) {
+                    IesFloat32 -> IesFloat32.decodeFrom(buffer)
+                    IesString1 -> IesString1.decodeFrom(buffer)
+                    IesString2 -> IesString2.decodeFrom(buffer)
                 }
             }
-            data[column] = IesStructData(table.columns[column]) {
-                readFrom(buffer, readData)
-            }
-            i++
         }
+        for (entry in entries) {
+            if (entry.isString) entry.flag = buffer.get()
+        }
+        this.entries = entries.toTypedArray()
     }
 
     override fun writeTo(buffer: ByteBuffer) {
         buffer.putInt(id)
         buffer.putUShort(key.length.toUShort())
         buffer.putString(key.shiftBits())
-        writeEntries<IesStructDataType.Float32>(buffer)
-        writeEntries<IesStructDataType.String>(buffer)
+        /*writeEntries<IesFloat32>(buffer)
+        writeEntries<IesStructDataType.String>(buffer)*/
+        for (entry in entries) {
+            entry.writeTo(buffer)
+        }
         for (entry in entries) {
             if (entry.isString) buffer.put(entry.flag)
         }

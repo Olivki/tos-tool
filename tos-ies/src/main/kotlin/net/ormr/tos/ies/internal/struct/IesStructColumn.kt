@@ -21,7 +21,7 @@ import net.ormr.tos.ies.internal.shiftBits
 import net.ormr.tos.putNullTerminatedString
 import java.nio.ByteBuffer
 
-internal class IesStructColumn : IesStruct {
+internal class IesStructColumn : IesStruct, Comparable<IesStructColumn> {
     lateinit var name: String // 64 bytes
     lateinit var key: String // 64 bytes
     lateinit var type: IesStructDataType
@@ -53,6 +53,13 @@ internal class IesStructColumn : IesStruct {
     }
 
     override fun getSize(): Int = (64 * 2) + (Short.SIZE_BYTES * 2) + Int.SIZE_BYTES
+
+    override fun compareTo(other: IesStructColumn): Int = when {
+        type.isSameTypeAs(other.type) -> pos.compareTo(other.pos)
+        type.id < other.type.id -> -1
+        else -> 1
+    }
+
     override fun toString(): String =
         "IesStructColumn(name='$name', name2='$key', type=$type, unk1=$unk1, unk2=$unk2, pos=$pos)"
 

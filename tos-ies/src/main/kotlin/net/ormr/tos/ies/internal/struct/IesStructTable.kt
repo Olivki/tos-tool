@@ -22,6 +22,8 @@ internal class IesStructTable : IesStruct {
     lateinit var header: IesStructHeader
     lateinit var columns: Array<IesStructColumn>
     lateinit var rows: Array<IesStructRow>
+    
+    val sortedColumns: List<IesStructColumn> by lazy { columns.sorted() }
 
     override fun readFrom(buffer: ByteBuffer) {
         header = IesStructHeader(this) { readFrom(buffer) }
