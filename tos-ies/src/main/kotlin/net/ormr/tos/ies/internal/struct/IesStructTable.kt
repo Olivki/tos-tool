@@ -22,7 +22,7 @@ internal class IesStructTable : IesStruct {
     lateinit var header: IesStructHeader
     lateinit var columns: Array<IesStructColumn>
     lateinit var rows: Array<IesStructRow>
-    
+
     val sortedColumns: List<IesStructColumn> by lazy { columns.sorted() }
 
     override fun readFrom(buffer: ByteBuffer) {
@@ -43,7 +43,7 @@ internal class IesStructTable : IesStruct {
 
     fun getColumnsSize(): Int = columns.sumOf { it.getSize() }
 
-    fun getRowsSize(): Int = columns.sumOf { it.getSize() }
+    fun getRowsSize(): Int = rows.sumOf { it.getSize() }
 
     override fun getSize(): Int = header.getSize() + getColumnsSize() + getRowsSize()
 

@@ -104,7 +104,7 @@ internal fun IesStructTable.toIesTable(): IesTable {
     return IesTable(
         header = IesHeader(
             name = header.name,
-            flag = header.flag1,
+            flag1 = header.flag1,
             flag2 = header.flag2,
             unknown = header.unkColumns,
         ),

@@ -25,5 +25,5 @@ interface IesHeader : IesElement {
     var unknown: Short
 }
 
-fun IesHeader(name: String, flag: Int = 0, flag2: Short = 0, unknown: Short = 0): IesHeader =
-    IesHeaderImpl(name, flag, flag2, unknown)
+fun IesHeader(name: String, flag1: Int = 0, flag2: Short = 0, unknown: Short = 0): IesHeader =
+    IesHeaderImpl(name, flag1, flag2, unknown)
