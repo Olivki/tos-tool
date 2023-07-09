@@ -20,7 +20,6 @@ import net.ormr.tos.getString
 import net.ormr.tos.getUShort
 import net.ormr.tos.ies.internal.shiftBits
 import net.ormr.tos.ies.internal.utf8SizeOf
-import net.ormr.tos.putString
 import net.ormr.tos.putUShort
 import java.nio.ByteBuffer
 import net.ormr.tos.ies.internal.struct.IesStructDataType.Float32 as IesFloat32
@@ -55,30 +54,14 @@ internal class IesStructRow(val table: IesStructTable) : IesStruct {
 
     override fun writeTo(buffer: ByteBuffer) {
         buffer.putInt(id)
-        buffer.putUShort(key.length.toUShort())
-        buffer.putString(key.shiftBits())
-        /*writeEntries<IesFloat32>(buffer)
-        writeEntries<IesStructDataType.String>(buffer)*/
+        val keyBytes = key.shiftBits().toByteArray()
+        buffer.putUShort(keyBytes.size.toUShort())
+        buffer.put(keyBytes)
         for (entry in entries) {
             entry.writeTo(buffer)
         }
         for (entry in entries) {
             if (entry.isString) buffer.put(entry.flag)
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private inline fun <reified T : IesStructDataType> writeEntries(buffer: ByteBuffer) {
-        val entries = entries.copyOf() as Array<IesStructData?>
-        for (i in entries.indices) {
-            for (j in entries.indices) {
-                val entry = entries[j]
-                if (entry != null && entry.column.type is T) {
-                    entry.writeTo(buffer)
-                    entries[j] = null
-                    break
-                }
-            }
         }
     }
 

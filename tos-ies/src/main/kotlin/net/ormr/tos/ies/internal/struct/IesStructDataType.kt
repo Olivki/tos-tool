@@ -20,7 +20,6 @@ import net.ormr.tos.getString
 import net.ormr.tos.getUShort
 import net.ormr.tos.ies.internal.shiftBits
 import net.ormr.tos.ies.internal.utf8SizeOf
-import net.ormr.tos.putString
 import net.ormr.tos.putUShort
 import java.nio.ByteBuffer
 import kotlin.String as KString
@@ -57,8 +56,9 @@ sealed class IesStructDataType(val id: Short, val name: KString) {
 
         override fun encodeTo(buffer: ByteBuffer, value: Any) {
             require(value is KString) { "Value must be of type 'String', was '${value.javaClass.name}'" }
-            buffer.putUShort(value.length.toUShort())
-            buffer.putString(value.shiftBits())
+            val bytes = value.shiftBits().toByteArray()
+            buffer.putUShort(bytes.size.toUShort())
+            buffer.put(bytes)
         }
 
         override fun getSizeOf(value: Any): Int {

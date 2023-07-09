@@ -129,7 +129,6 @@ data object IesXmlSerializer : IesSerializer {
             rows += row
         }
 
-        //println("${rows.size} : ${columns.size}")
         table.rows = rows.toTypedArray()
         table.columns = columns.toTypedArray()
         header.apply {
@@ -141,7 +140,6 @@ data object IesXmlSerializer : IesSerializer {
             intColumns = columns.count { it.type is IesDataType.Float32 }.toShort()
             stringColumns = columns.count { it.type is IesDataType.String }.toShort()
         }
-        //println(header)
         header.update()
         return table
     }
