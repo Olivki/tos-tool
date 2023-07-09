@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":tos-common"))
     implementation(project(":tos-ies"))
     implementation(project(":tos-ipf"))
     implementation(project(":tos-xac"))
@@ -14,7 +15,7 @@ dependencies {
     implementation(libs.jaxen)
 
     implementation(libs.kxml2)
-    
+
     implementation(libs.bundles.slf4j)
 
     testImplementation(kotlin("test"))

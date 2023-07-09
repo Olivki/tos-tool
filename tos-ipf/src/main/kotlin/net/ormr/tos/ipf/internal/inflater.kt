@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.cli
+package net.ormr.tos.ipf.internal
 
-import com.github.ajalt.clikt.core.subcommands
-import net.ormr.tos.cli.ies.IesCommand
-import net.ormr.tos.cli.ies.IesUnpackCommand
-import net.ormr.tos.cli.ipf.IpfCommand
-import net.ormr.tos.cli.ipf.IpfUnpackCommand
+import net.ormr.tos.DirectByteBuffer
+import java.nio.ByteBuffer
+import java.util.zip.Inflater
 
-fun main(args: Array<String>) = TosCommand()
-    .subcommands(
-        IesCommand().subcommands(IesUnpackCommand()),
-        IpfCommand().subcommands(IpfUnpackCommand()),
-    )
-    .main(args)
+internal fun ByteBuffer.inflateTo(expectedSize: Int): ByteBuffer {
+    val inflater = Inflater(true)
+    inflater.setInput(this)
+    val result = DirectByteBuffer(expectedSize, order())
+    inflater.inflate(result)
+    result.position(0)
+    return result
+}

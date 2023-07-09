@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.cli
+package net.ormr.tos.ipf.internal
 
-import com.github.ajalt.clikt.core.subcommands
-import net.ormr.tos.cli.ies.IesCommand
-import net.ormr.tos.cli.ies.IesUnpackCommand
-import net.ormr.tos.cli.ipf.IpfCommand
-import net.ormr.tos.cli.ipf.IpfUnpackCommand
+/** CRC-32-IEEE 802.3  */
+private const val POLYNOMIAL = -0x12477CE0
+private val LOOKUP_TABLE = IntArray(256) { i ->
+    var value = i
+    repeat(8) {
+        value = (if (value and 1 == 1) value ushr 1 xor POLYNOMIAL else value ushr 1)
+    }
+    value
+}
 
-fun main(args: Array<String>) = TosCommand()
-    .subcommands(
-        IesCommand().subcommands(IesUnpackCommand()),
-        IpfCommand().subcommands(IpfUnpackCommand()),
-    )
-    .main(args)
+internal fun calculateCrc32(crc: Int, b: Byte): Int = LOOKUP_TABLE[crc xor b.toInt() and 0xFF] xor (crc ushr 8)

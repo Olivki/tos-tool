@@ -66,9 +66,7 @@ public class Packer {
             // TODO: is not commented in og!!!
             //e.setFile(file);
             e.setName(name.substring(1, name.length()));
-            List<IpfElement> elements = map.get(archive);
-            if (elements == null)
-                map.put(archive, elements = new ArrayList<>());
+            List<IpfElement> elements = map.computeIfAbsent(archive, k -> new ArrayList<>());
             elements.add(e);
             return;
         }

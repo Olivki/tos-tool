@@ -16,15 +16,6 @@
 
 package net.ormr.tos.cli
 
-import com.github.ajalt.clikt.core.subcommands
-import net.ormr.tos.cli.ies.IesCommand
-import net.ormr.tos.cli.ies.IesUnpackCommand
-import net.ormr.tos.cli.ipf.IpfCommand
-import net.ormr.tos.cli.ipf.IpfUnpackCommand
-
-fun main(args: Array<String>) = TosCommand()
-    .subcommands(
-        IesCommand().subcommands(IesUnpackCommand()),
-        IpfCommand().subcommands(IpfUnpackCommand()),
-    )
-    .main(args)
+object Sys {
+    val availableProcessors: Int by lazy { Runtime.getRuntime().availableProcessors() }
+}
