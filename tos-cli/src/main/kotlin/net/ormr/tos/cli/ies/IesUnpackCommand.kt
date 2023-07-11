@@ -19,17 +19,17 @@ package net.ormr.tos.cli.ies
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.help
-import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.groups.defaultByName
+import com.github.ajalt.clikt.parameters.groups.groupChoice
 import com.github.ajalt.clikt.parameters.options.defaultLazy
 import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.types.choice
 import com.github.ajalt.clikt.parameters.types.path
 import com.github.ajalt.mordant.animation.textAnimation
 import com.github.ajalt.mordant.rendering.TextColors.blue
 import com.github.ajalt.mordant.rendering.TextColors.gray
-import net.ormr.tos.cli.ies.serializer.IesSerializer
-import net.ormr.tos.cli.ies.serializer.IesXmlSerializer
+import net.ormr.tos.cli.ies.format.IesCsvFormat
+import net.ormr.tos.cli.ies.format.IesXmlFormat
 import net.ormr.tos.cli.t
 import net.ormr.tos.ies.element.IesTable
 import java.nio.ByteOrder.LITTLE_ENDIAN
@@ -39,18 +39,21 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption.READ
 import kotlin.io.path.*
 
-class IesUnpackCommand : CliktCommand(name = "unpack") {
+class IesUnpackCommand : CliktCommand(name = "unpack"), IesOutputParent {
     private val input by argument()
         .help("Input file or directory")
         .path(mustExist = true, mustBeReadable = true, canBeDir = true, canBeFile = true, canBeSymlink = false)
-    private val output by option("-o", "--output")
+    override val output by option("-o", "--output")
         .help("Output directory")
         .path()
         .defaultLazy { Path("./unpacked_ies/") }
-    private val format: IesSerializer by option("-f", "--format")
+    private val format by option("-f", "--format")
         .help("Output format")
-        .choice("xml" to IesXmlSerializer)
-        .default(IesXmlSerializer)
+        .groupChoice(
+            "xml" to IesXmlFormat(this),
+            "csv" to IesCsvFormat(this),
+        )
+        .defaultByName("xml") // TODO: set it as required instead of default?
 
     @OptIn(ExperimentalPathApi::class)
     override fun run() {
@@ -75,8 +78,12 @@ class IesUnpackCommand : CliktCommand(name = "unpack") {
 
     private fun unpackFile(file: Path) {
         val table = readIesTable(file)
-        val target = output / "${file.nameWithoutExtension}.xml"
-        format.encodeToFile(table, target)
+        val extension = when (format) {
+            is IesXmlFormat -> "xml"
+            is IesCsvFormat -> "csv"
+        }
+        val target = output / "${file.nameWithoutExtension}.${extension}"
+        format.save(table, target)
     }
 
     private fun readIesTable(input: Path): IesTable = FileChannel.open(input, READ).use { channel ->

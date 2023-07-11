@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
     application
 }
 
@@ -8,6 +9,14 @@ dependencies {
     implementation(project(":tos-ies"))
     implementation(project(":tos-ipf"))
     implementation(project(":tos-xac"))
+
+    implementation("org.apache.commons:commons-csv:1.10.0")
+
+    implementation(libs.kotlinx.serialization.json)
+    implementation("com.ensarsarajcic.kotlinx:serialization-msgpack:0.5.4")
+
+    implementation("net.ormr.krautils:krautils-core:0.2.0")
+    implementation("net.ormr.krautils:krautils-compress:0.0.1")
 
     implementation(libs.clikt)
 
