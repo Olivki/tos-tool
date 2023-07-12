@@ -18,56 +18,30 @@ package net.ormr.ieseditor.views
 
 import atlantafx.base.theme.Styles
 import atlantafx.base.theme.Tweaks
-import javafx.beans.property.SimpleFloatProperty
-import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleStringProperty
-import javafx.scene.control.Alert
+import javafx.scene.control.Label
+import javafx.scene.control.Pagination
+import javafx.scene.control.TableView
+import javafx.scene.layout.StackPane
 import javafx.util.StringConverter
+import net.ormr.ieseditor.controllers.IesEditorController
 import net.ormr.ieseditor.utils.addStyleClasses
 import net.ormr.ieseditor.utils.customTextField
 import net.ormr.ieseditor.utils.iesEditorConfig
-import net.ormr.tos.ies.element.*
+import net.ormr.ieseditor.utils.openIesEditorView
+import net.ormr.tos.ies.element.IesColumn
+import net.ormr.tos.ies.element.IesType
 import org.kordamp.ikonli.feather.Feather
 import org.kordamp.ikonli.javafx.FontIcon
 import tornadofx.*
-import java.nio.ByteOrder
-import java.nio.channels.FileChannel
-import java.nio.channels.FileChannel.MapMode.READ_ONLY
 import java.nio.file.Path
-import java.nio.file.StandardOpenOption.READ
-import kotlin.io.path.fileSize
 import kotlin.io.path.name
-import kotlin.io.path.notExists
 
-class IesEditorView(private val file: Path) : View("IES Editor: ${file.name}") {
-    private val iesTable by lazy {
-        readIesTable(file)
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private val gamer by lazy {
-        iesTable.rows.map { row ->
-            val dataRow = DataRow(row)
-            for (value in row.values) {
-                dataRow.data.add(
-                    when (value) {
-                        is IesStringValue<*> -> Data.IesString(
-                            value as IesStringValue<IesType.String>,
-                            SimpleStringProperty(value.data),
-                        )
-                        is IesFloat32Value -> Data.IesFloat(value, SimpleFloatProperty(value.data))
-                    }
-                )
-            }
-            dataRow
-        }.toObservable()
-    }
-
-    private fun readIesTable(input: Path): IesTable = FileChannel.open(input, READ).use { channel ->
-        val buffer = channel.map(READ_ONLY, 0, input.fileSize()).order(ByteOrder.LITTLE_ENDIAN)
-        IesTable.readFromByteBuffer(buffer)
-    }
-
+class IesEditorView(file: Path) : View("IES Editor: ${file.name}") {
+    private val controller = IesEditorController(file)
+    private val iesTable get() = controller.iesTable
+    private lateinit var tableView: TableView<IesEditorController.DataRow>
+    private lateinit var pagination: Pagination
+    private var hasLoaded = false
 
     @Suppress("UNCHECKED_CAST")
     override val root = borderpane {
@@ -96,16 +70,28 @@ class IesEditorView(private val file: Path) : View("IES Editor: ${file.name}") {
             }
             menu("Settings")
         }
-        center = tableview(items = gamer) {
-            addStyleClasses(Styles.STRIPED, Styles.DENSE, Tweaks.EDGE_TO_EDGE)
-            for ((i, column) in iesTable.columns.sortedWith(IesColumn.BINARY_COMPARATOR).withIndex()) {
-                when (column.type) {
-                    is IesType.Float32 -> column(column.name) {
-                        (it.value.data[i] as Data.IesFloat).property
-                    }.useTextField(FloatConverter as StringConverter<Number>)
-                    is IesType.String -> column(column.name) {
-                        (it.value.data[i] as Data.IesString).property
-                    }.makeEditable()
+        center = vbox {
+            tableView = tableview<IesEditorController.DataRow> {
+                addStyleClasses(Styles.STRIPED, Styles.DENSE, Tweaks.EDGE_TO_EDGE)
+                for ((i, column) in iesTable.columns.sortedWith(IesColumn.BINARY_COMPARATOR).withIndex()) {
+                    when (column.type) {
+                        is IesType.Float32 -> column(column.name) {
+                            controller.getFloatProperty(it.value.data[i])
+                        }.useTextField(FloatConverter as StringConverter<Number>)
+                        is IesType.String -> column(column.name) {
+                            controller.getStringProperty(it.value.data[i])
+                        }.makeEditable()
+                    }
+                }
+                prefHeightProperty().bind(this@borderpane.prefHeightProperty())
+            }
+            pagination = pagination {
+                controller.selectedIndexProperty.bindBidirectional(currentPageIndexProperty())
+                setPageFactory { i ->
+                    if (hasLoaded) {
+                        tableView.items.setAll(controller.dataRows[i])
+                    }
+                    StackPane()
                 }
             }
         }
@@ -113,6 +99,19 @@ class IesEditorView(private val file: Path) : View("IES Editor: ${file.name}") {
             left = FontIcon(Feather.SEARCH)
             promptText = "Search..."
             right = FontIcon(Feather.X)
+        }
+    }
+
+    override fun onBeforeShow() {
+        val node = MaskPane().apply {
+            center = Label("Loading..")
+        }
+        root.runAsyncWithOverlay(node) {
+            controller.dataRows[0]
+        } success {
+            hasLoaded = true
+            pagination.pageCount = controller.dataRows.size
+            tableView.items.setAll(it)
         }
     }
 
@@ -125,35 +124,5 @@ class IesEditorView(private val file: Path) : View("IES Editor: ${file.name}") {
         override fun fromString(string: String?): Float = if (string.isNullOrBlank()) 0F else string.toFloat()
     }
 
-    class DataRow(row: IesRow) {
-        val idProperty = SimpleIntegerProperty(row.id)
-        val keyProperty = SimpleStringProperty(row.key)
-        val data = mutableListOf<Data<*, *>>()
-    }
 
-    sealed interface Data<T : Any, out V : IesValue<T, *>> {
-        val value: V
-
-        data class IesString(
-            override val value: IesStringValue<IesType.String>,
-            val property: SimpleStringProperty,
-        ) : Data<String, IesStringValue<IesType.String>>
-
-        data class IesFloat(
-            override val value: IesFloat32Value,
-            val property: SimpleFloatProperty,
-        ) : Data<Float, IesValue<Float, IesType.Float32>>
-    }
-
-    private fun openIesEditorView(file: Path) {
-        if (file.notExists()) {
-            alert(Alert.AlertType.ERROR, "File Not Found", "File '${file.fileName}' does not exist.")
-        } else {
-            iesEditorConfig.lastDirectory = file.parent
-            iesEditorConfig.lastIesFile = file
-            IesEditorView(file).openWindow(
-                escapeClosesWindow = false,
-            )
-        }
-    }
 }

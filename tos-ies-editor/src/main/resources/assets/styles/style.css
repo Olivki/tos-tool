@@ -1,3 +1,17 @@
 * {
     -fx-font-family: 'Roboto';
 }
+
+.loading-dialog {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+}
+
+.mask-pane {
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-accent: unset;
+}
+
+.mask-pane > .progress-indicator {
+    -fx-max-width: unset;
+    -fx-max-height: unset;
+}
