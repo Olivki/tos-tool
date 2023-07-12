@@ -36,11 +36,11 @@ fun IesFloat32Value(
     column: IesColumn<Float>,
 ): IesFloat32Value = IesFloat32ValueImpl(value, column)
 
-sealed interface IesStringValue<IT : IesType<String>> : IesValue<String, IT> {
+sealed interface IesStringValue : IesValue<String, IesType.String> {
     var flag: Boolean
 }
 
-interface IesString1Value : IesStringValue<IesType.String1> {
+interface IesString1Value : IesStringValue {
     override val type: IesType.String1
         get() = IesType.String1
 }
@@ -51,7 +51,7 @@ fun IesString1Value(
     flag: Boolean = false,
 ): IesString1Value = IesString1ValueImpl(value, column, flag)
 
-interface IesString2Value : IesStringValue<IesType.String2> {
+interface IesString2Value : IesStringValue {
     override val type: IesType.String2
         get() = IesType.String2
 }
