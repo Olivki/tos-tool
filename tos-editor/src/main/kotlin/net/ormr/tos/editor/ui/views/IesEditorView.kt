@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.editor.views
+package net.ormr.tos.editor.ui.views
 
 import atlantafx.base.theme.Styles
 import atlantafx.base.theme.Tweaks
@@ -22,7 +22,7 @@ import javafx.scene.control.Label
 import javafx.scene.control.SelectionMode
 import javafx.scene.control.TableView
 import javafx.util.StringConverter
-import net.ormr.tos.editor.controllers.IesEditorController
+import net.ormr.tos.editor.ui.controllers.IesEditorController
 import net.ormr.tos.editor.utils.addStyleClasses
 import net.ormr.tos.editor.utils.customTextField
 import net.ormr.tos.editor.utils.openIesEditorView

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.editor.controllers
+package net.ormr.tos.editor.ui.controllers
 
 import javafx.beans.property.SimpleFloatProperty
 import javafx.beans.property.SimpleIntegerProperty

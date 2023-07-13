@@ -27,8 +27,8 @@ import kotlinx.serialization.json.Json
 import net.ormr.tos.editor.Constants.configFile
 import net.ormr.tos.editor.models.ConfigModel
 import net.ormr.tos.editor.records.ConfigRecord
+import net.ormr.tos.editor.ui.views.MainView
 import net.ormr.tos.editor.utils.launchEffect
-import net.ormr.tos.editor.views.MainView
 import tornadofx.*
 import kotlin.io.path.createDirectories
 import kotlin.io.path.notExists

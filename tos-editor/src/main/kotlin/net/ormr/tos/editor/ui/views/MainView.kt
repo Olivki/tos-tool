@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.editor.views
+package net.ormr.tos.editor.ui.views
 
 import net.ormr.tos.editor.utils.openIesEditorView
 import net.ormr.tos.editor.utils.tosEditorConfig

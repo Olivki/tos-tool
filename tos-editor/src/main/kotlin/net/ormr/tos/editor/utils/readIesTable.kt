@@ -17,7 +17,7 @@
 package net.ormr.tos.editor.utils
 
 import javafx.scene.control.Alert
-import net.ormr.tos.editor.views.IesEditorView
+import net.ormr.tos.editor.ui.views.IesEditorView
 import net.ormr.tos.ies.element.IesTable
 import tornadofx.*
 import java.nio.ByteOrder
