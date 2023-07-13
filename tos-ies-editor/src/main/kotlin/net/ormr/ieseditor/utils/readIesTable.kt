@@ -17,7 +17,7 @@
 package net.ormr.ieseditor.utils
 
 import javafx.scene.control.Alert
-import net.ormr.ieseditor.views.IesEditorView
+import net.ormr.ieseditor.views.IesEditorViewNP
 import net.ormr.tos.ies.element.IesTable
 import tornadofx.*
 import java.nio.ByteOrder
@@ -38,7 +38,7 @@ fun openIesEditorView(file: Path) {
     } else {
         iesEditorConfig.lastDirectory = file.parent
         iesEditorConfig.lastIesFile = file
-        IesEditorView(file).openWindow(
+        IesEditorViewNP(file).openWindow(
             escapeClosesWindow = false,
         )
     }

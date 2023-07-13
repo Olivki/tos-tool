@@ -22,6 +22,8 @@ dependencies {
     implementation("org.kordamp.ikonli:ikonli-javafx:12.3.1")
     implementation("org.kordamp.ikonli:ikonli-feather-pack:12.3.1")
 
+    implementation("org.controlsfx:controlsfx:11.1.2")
+
     implementation("no.tornado:tornadofx:1.7.20")
     implementation("io.github.mkpaz:atlantafx-base:2.0.1")
 }
