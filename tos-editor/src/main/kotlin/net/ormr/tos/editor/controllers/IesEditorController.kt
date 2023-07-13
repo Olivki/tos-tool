@@ -37,51 +37,36 @@ class IesEditorController(val file: Path) : Controller() {
     val dataRows by lazy {
         iesTable
             .rows
-            .asSequence()
-            .chunked(100)
-            .map { chunk ->
-                chunk.map { row ->
-                    val dataRow = _root_ide_package_.net.ormr.tos.editor.controllers.IesEditorController.DataRow(row)
-                    for (value in row.values) {
-                        dataRow.data.add(
-                            when (value) {
-                                is IesString1Value -> _root_ide_package_.net.ormr.tos.editor.controllers.IesEditorController.Data.IesString(
-                                    value,
-                                    SimpleStringProperty(value.data)
-                                )
-                                is IesString2Value -> _root_ide_package_.net.ormr.tos.editor.controllers.IesEditorController.Data.IesString(
-                                    value,
-                                    SimpleStringProperty(value.data)
-                                )
-                                is IesFloat32Value -> _root_ide_package_.net.ormr.tos.editor.controllers.IesEditorController.Data.IesFloat(
-                                    value,
-                                    SimpleFloatProperty(value.data)
-                                )
-                            }
-                        )
-                    }
-                    dataRow
-                }.toObservable()
+            .map { row ->
+                val dataRow = DataRow(row)
+                for (value in row.values) {
+                    dataRow.data.add(
+                        when (value) {
+                            is IesString1Value -> Data.IesString(value, SimpleStringProperty(value.data))
+                            is IesString2Value -> Data.IesString(value, SimpleStringProperty(value.data))
+                            is IesFloat32Value -> Data.IesFloat(value, SimpleFloatProperty(value.data))
+                        }
+                    )
+                }
+                dataRow
             }
-            .toList()
+            .toObservable()
     }
 
-    fun getFloatProperty(data: net.ormr.tos.editor.controllers.IesEditorController.Data<*, *>): SimpleFloatProperty =
-        when (data) {
-            is net.ormr.tos.editor.controllers.IesEditorController.Data.IesFloat -> data.property
-            else -> error("Expected 'Data.IesFloat', but got '${data::class.simpleName}'")
-        }
+    fun getFloatProperty(data: Data<*, *>): SimpleFloatProperty = when (data) {
+        is Data.IesFloat -> data.property
+        else -> error("Expected 'Data.IesFloat', but got '${data::class.simpleName}'")
+    }
 
-    fun getStringProperty(data: _root_ide_package_.net.ormr.tos.editor.controllers.IesEditorController.Data<*, *>): SimpleStringProperty =
-        when (data) {
-            is _root_ide_package_.net.ormr.tos.editor.controllers.IesEditorController.Data.IesString -> data.property
-            else -> error("Expected 'Data.IesFloat', but got '${data::class.simpleName}'")
-        }
+    fun getStringProperty(data: Data<*, *>): SimpleStringProperty = when (data) {
+        is Data.IesString -> data.property
+        else -> error("Expected 'Data.IesFloat', but got '${data::class.simpleName}'")
+    }
 
     class DataRow(row: IesRow) {
         val idProperty = SimpleIntegerProperty(row.id)
         val keyProperty = SimpleStringProperty(row.key)
-        val data = mutableListOf<_root_ide_package_.net.ormr.tos.editor.controllers.IesEditorController.Data<*, *>>()
+        val data = mutableListOf<Data<*, *>>()
     }
 
     sealed interface Data<T : Any, out V : IesValue<T, *>> {
@@ -90,11 +75,11 @@ class IesEditorController(val file: Path) : Controller() {
         data class IesString(
             override val value: IesStringValue,
             val property: SimpleStringProperty,
-        ) : _root_ide_package_.net.ormr.tos.editor.controllers.IesEditorController.Data<String, IesStringValue>
+        ) : Data<String, IesStringValue>
 
         data class IesFloat(
             override val value: IesFloat32Value,
             val property: SimpleFloatProperty,
-        ) : _root_ide_package_.net.ormr.tos.editor.controllers.IesEditorController.Data<Float, IesFloat32Value>
+        ) : Data<Float, IesFloat32Value>
     }
 }

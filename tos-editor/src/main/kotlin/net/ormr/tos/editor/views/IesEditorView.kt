@@ -19,10 +19,10 @@ package net.ormr.tos.editor.views
 import atlantafx.base.theme.Styles
 import atlantafx.base.theme.Tweaks
 import javafx.scene.control.Label
-import javafx.scene.control.Pagination
+import javafx.scene.control.SelectionMode
 import javafx.scene.control.TableView
-import javafx.scene.layout.StackPane
 import javafx.util.StringConverter
+import net.ormr.tos.editor.controllers.IesEditorController
 import net.ormr.tos.editor.utils.addStyleClasses
 import net.ormr.tos.editor.utils.customTextField
 import net.ormr.tos.editor.utils.openIesEditorView
@@ -36,11 +36,9 @@ import java.nio.file.Path
 import kotlin.io.path.name
 
 class IesEditorView(file: Path) : View("IES Editor: ${file.name}") {
-    private val controller = _root_ide_package_.net.ormr.tos.editor.controllers.IesEditorController(file)
+    private val controller = IesEditorController(file)
     private val iesTable get() = controller.iesTable
-    private lateinit var tableView: TableView<_root_ide_package_.net.ormr.tos.editor.controllers.IesEditorController.DataRow>
-    private lateinit var pagination: Pagination
-    private var hasLoaded = false
+    private lateinit var tableView: TableView<IesEditorController.DataRow>
 
     @Suppress("UNCHECKED_CAST")
     override val root = borderpane {
@@ -70,8 +68,8 @@ class IesEditorView(file: Path) : View("IES Editor: ${file.name}") {
             menu("Settings")
         }
         center = vbox {
-            tableView = tableview<_root_ide_package_.net.ormr.tos.editor.controllers.IesEditorController.DataRow> {
-                addStyleClasses(Styles.STRIPED, Styles.DENSE, Tweaks.EDGE_TO_EDGE)
+            tableView = tableview<IesEditorController.DataRow> {
+                addStyleClasses(Styles.STRIPED, Styles.BORDERED, Styles.DENSE, Tweaks.EDGE_TO_EDGE)
                 for ((i, column) in iesTable.columns.sortedWith(IesColumn.BINARY_COMPARATOR).withIndex()) {
                     when (column.type) {
                         is IesType.Float32 -> column(column.name) {
@@ -83,14 +81,9 @@ class IesEditorView(file: Path) : View("IES Editor: ${file.name}") {
                     }
                 }
                 prefHeightProperty().bind(this@borderpane.prefHeightProperty())
-            }
-            pagination = pagination {
-                controller.selectedIndexProperty.bindBidirectional(currentPageIndexProperty())
-                setPageFactory { i ->
-                    if (hasLoaded) {
-                        tableView.items.setAll(controller.dataRows[i])
-                    }
-                    StackPane()
+                selectionModel.apply {
+                    selectionMode = SelectionMode.SINGLE
+                    isCellSelectionEnabled = true
                 }
             }
         }
@@ -106,11 +99,9 @@ class IesEditorView(file: Path) : View("IES Editor: ${file.name}") {
             center = Label("Loading..")
         }
         root.runAsyncWithOverlay(node) {
-            controller.dataRows[0]
+            controller.dataRows
         } success {
-            hasLoaded = true
-            pagination.pageCount = controller.dataRows.size
-            tableView.items.setAll(it)
+            tableView.items = it
         }
     }
 
