@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.editor.ui.views
+package net.ormr.tos.editor.ui.fragments
 
 import atlantafx.base.theme.Styles
 import atlantafx.base.theme.Tweaks
@@ -23,6 +23,7 @@ import javafx.scene.control.SelectionMode
 import javafx.scene.control.TableView
 import javafx.util.StringConverter
 import net.ormr.tos.editor.ui.controllers.IesEditorController
+import net.ormr.tos.editor.ui.views.chooseIesFile
 import net.ormr.tos.editor.utils.addStyleClasses
 import net.ormr.tos.editor.utils.customTextField
 import net.ormr.tos.editor.utils.openIesEditorView
@@ -35,7 +36,7 @@ import tornadofx.*
 import java.nio.file.Path
 import kotlin.io.path.name
 
-class IesEditorView(file: Path) : View("IES Editor: ${file.name}") {
+class IesEditorFragment(file: Path) : Fragment("IES Editor: ${file.name}") {
     private val controller = IesEditorController(file)
     private val iesTable get() = controller.iesTable
     private lateinit var tableView: TableView<IesEditorController.DataRow>
