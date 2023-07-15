@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.ies.internal.struct
+package net.ormr.tos.ies.struct
 
 import java.nio.ByteBuffer
 
-internal sealed interface IesStruct {
+sealed interface IesStruct {
     fun readFrom(buffer: ByteBuffer)
 
     fun writeTo(buffer: ByteBuffer)

@@ -18,7 +18,7 @@ package net.ormr.tos.ies.element
 
 import net.ormr.tos.ies.internal.element.IesTableImpl
 import net.ormr.tos.ies.internal.element.toIesTable
-import net.ormr.tos.ies.internal.struct.IesStructTable
+import net.ormr.tos.ies.struct.IesStructTable
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -29,6 +29,8 @@ interface IesTable : IesElement {
 
     val name: String
         get() = header.name
+
+    fun toStructTable(): IesStructTable
 
     fun toByteBuffer(): ByteBuffer
 

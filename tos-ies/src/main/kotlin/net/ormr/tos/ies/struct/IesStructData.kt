@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.ies.internal.struct
+package net.ormr.tos.ies.struct
 
 import java.nio.ByteBuffer
 
-internal class IesStructData(val column: IesStructColumn) : IesStruct {
+class IesStructData(val column: IesStructColumn) : IesStruct {
     lateinit var data: Any
     var flag: Byte = 0 // boolean
 

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.ies.internal.struct
+package net.ormr.tos.ies.struct
 
 import java.nio.ByteBuffer
 
-internal class IesStructTable : IesStruct {
+class IesStructTable : IesStruct {
     lateinit var header: IesStructHeader
     lateinit var columns: Array<IesStructColumn>
     lateinit var rows: Array<IesStructRow>

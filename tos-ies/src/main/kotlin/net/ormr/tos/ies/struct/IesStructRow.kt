@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.ies.internal.struct
+package net.ormr.tos.ies.struct
 
 import net.ormr.tos.getString
 import net.ormr.tos.getUShort
@@ -22,11 +22,11 @@ import net.ormr.tos.ies.internal.shiftBits
 import net.ormr.tos.ies.internal.utf8SizeOf
 import net.ormr.tos.putUShort
 import java.nio.ByteBuffer
-import net.ormr.tos.ies.internal.struct.IesStructDataType.Float32 as IesFloat32
-import net.ormr.tos.ies.internal.struct.IesStructDataType.String1 as IesString1
-import net.ormr.tos.ies.internal.struct.IesStructDataType.String2 as IesString2
+import net.ormr.tos.ies.struct.IesStructDataType.Float32 as IesFloat32
+import net.ormr.tos.ies.struct.IesStructDataType.String1 as IesString1
+import net.ormr.tos.ies.struct.IesStructDataType.String2 as IesString2
 
-internal class IesStructRow(val table: IesStructTable) : IesStruct {
+class IesStructRow(val table: IesStructTable) : IesStruct {
     var id: Int = 0
     lateinit var key: String
     lateinit var entries: Array<IesStructData>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.ies.internal.struct
+package net.ormr.tos.ies.struct
 
 import net.ormr.tos.getString
 import net.ormr.tos.getUShort
@@ -69,5 +69,6 @@ sealed class IesStructDataType(val id: Short, val name: KString) {
 
     data object String1 : String(id = 1, name = "string1")
 
+    // TODO: Rename to 'Calculated' :huh:
     data object String2 : String(id = 2, name = "string2")
 }

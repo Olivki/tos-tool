@@ -18,7 +18,8 @@ package net.ormr.tos.ies.internal.element
 
 import net.ormr.tos.DirectByteBuffer
 import net.ormr.tos.ies.element.*
-import net.ormr.tos.ies.internal.struct.*
+import net.ormr.tos.ies.struct.*
+import net.ormr.tos.ies.struct.IesStructColumn
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -27,9 +28,9 @@ internal data class IesTableImpl(
     override val columns: MutableList<IesColumn<*>>,
     override val rows: MutableList<IesRow>,
 ) : IesTable, InternalIesElementImpl {
-    override fun toByteBuffer(): ByteBuffer {
+    override fun toStructTable(): IesStructTable {
         val self = this
-        val structTable = IesStructTable {
+        return IesStructTable {
             this.header = IesStructHeader(this) {
                 this.name = self.header.name
                 this.flag1 = self.header.flag1
@@ -70,6 +71,10 @@ internal data class IesTableImpl(
                 }
             }
         }
+    }
+
+    override fun toByteBuffer(): ByteBuffer {
+        val structTable = toStructTable()
         val buffer = DirectByteBuffer(structTable.getSize() + 1, ByteOrder.LITTLE_ENDIAN)
         structTable.writeTo(buffer)
         return buffer.flip()
@@ -91,9 +96,9 @@ internal fun IesStructTable.toIesTable(): IesTable {
             name = column.name,
             key = column.key,
             type = when (column.type) {
-                IesStructDataType.Float32 -> IesType.Float32
-                IesStructDataType.String1 -> IesType.String1
-                IesStructDataType.String2 -> IesType.String2
+                net.ormr.tos.ies.struct.IesStructDataType.Float32 -> IesType.Float32
+                net.ormr.tos.ies.struct.IesStructDataType.String1 -> IesType.String1
+                net.ormr.tos.ies.struct.IesStructDataType.String2 -> IesType.String2
             },
             position = column.pos,
             unk1 = column.unk1,

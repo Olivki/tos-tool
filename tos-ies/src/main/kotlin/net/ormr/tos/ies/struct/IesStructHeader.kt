@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.ies.internal.struct
+package net.ormr.tos.ies.struct
 
 import net.ormr.tos.getNullTerminatedString
 import net.ormr.tos.putNullTerminatedString
 import java.nio.ByteBuffer
 
-internal class IesStructHeader(val table: IesStructTable) : IesStruct {
+class IesStructHeader(val table: IesStructTable) : IesStruct {
     lateinit var name: String // 128 byte length name
     var flag1: Int = 0
     var columnSize: Int = 0

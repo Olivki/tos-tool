@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.ies.internal.struct
+package net.ormr.tos.ies.struct
 
 import net.ormr.tos.getNullTerminatedString
 import net.ormr.tos.ies.internal.shiftBits
 import net.ormr.tos.putNullTerminatedString
 import java.nio.ByteBuffer
 
-internal class IesStructColumn : IesStruct, Comparable<IesStructColumn> {
+class IesStructColumn : IesStruct, Comparable<IesStructColumn> {
     lateinit var name: String // 64 bytes
     lateinit var key: String // 64 bytes
     lateinit var type: IesStructDataType
