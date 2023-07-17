@@ -24,17 +24,21 @@ class MainView : View("ToS Editor") {
     private val hasRecentFile = booleanBinding(tosEditorConfig.lastIesFileProperty) { value != null }
 
     override val root = vbox {
-        button("Open File..") {
-            action {
-                val file = chooseIesFile()
-                if (file != null) openIesEditorView(file)
-            }
-        }
-        button("Open Recent File..") {
-            enableWhen(hasRecentFile)
-            action {
-                val file = tosEditorConfig.lastIesFile
-                if (file != null) openIesEditorView(file)
+        titledpane(title = "IES", collapsible = false) {
+            hbox(spacing = 15) {
+                button("Open File..") {
+                    action {
+                        val file = chooseIesFile()
+                        if (file != null) openIesEditorView(file)
+                    }
+                }
+                button("Open Recent File..") {
+                    enableWhen(hasRecentFile)
+                    action {
+                        val file = tosEditorConfig.lastIesFile
+                        if (file != null) openIesEditorView(file)
+                    }
+                }
             }
         }
     }

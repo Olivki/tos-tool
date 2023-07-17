@@ -16,7 +16,7 @@
 
 package net.ormr.tos.ies.internal
 
-internal fun String.shiftBits(): String {
+internal fun String.xor(): String {
     val bytes = toByteArray()
     for (i in bytes.indices) bytes[i] = (bytes[i].toInt() xor 0x1).toByte()
     return String(bytes)

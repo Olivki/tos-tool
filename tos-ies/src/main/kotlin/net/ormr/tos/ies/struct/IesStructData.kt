@@ -20,7 +20,7 @@ import java.nio.ByteBuffer
 
 class IesStructData(val column: IesStructColumn) : IesStruct {
     lateinit var data: Any
-    var flag: Byte = 0 // boolean
+    var flag: Byte = 0 // boolean | useScrFunc
 
     val isString: Boolean
         get() = column.type is IesStructDataType.String

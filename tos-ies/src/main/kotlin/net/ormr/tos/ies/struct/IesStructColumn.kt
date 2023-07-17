@@ -17,21 +17,21 @@
 package net.ormr.tos.ies.struct
 
 import net.ormr.tos.getNullTerminatedString
-import net.ormr.tos.ies.internal.shiftBits
+import net.ormr.tos.ies.internal.xor
 import net.ormr.tos.putNullTerminatedString
 import java.nio.ByteBuffer
 
 class IesStructColumn : IesStruct, Comparable<IesStructColumn> {
-    lateinit var name: String // 64 bytes
-    lateinit var key: String // 64 bytes
-    lateinit var type: IesStructDataType
+    lateinit var name: String // 64 bytes | colume
+    lateinit var key: String // 64 bytes | name
+    lateinit var type: IesStructDataType // 32 bits?
     var unk1: Short = 0
     var unk2: Short = 0
     var pos: Short = 0
 
     override fun readFrom(buffer: ByteBuffer) {
-        name = buffer.getNullTerminatedString(64).shiftBits()
-        key = buffer.getNullTerminatedString(64).shiftBits()
+        name = buffer.getNullTerminatedString(64).xor()
+        key = buffer.getNullTerminatedString(64).xor()
         type = when (val typeId = buffer.getShort()) {
             0.toShort() -> IesStructDataType.Float32
             1.toShort() -> IesStructDataType.String1
@@ -44,8 +44,8 @@ class IesStructColumn : IesStruct, Comparable<IesStructColumn> {
     }
 
     override fun writeTo(buffer: ByteBuffer) {
-        buffer.putNullTerminatedString(name.shiftBits(), 64)
-        buffer.putNullTerminatedString(key.shiftBits(), 64)
+        buffer.putNullTerminatedString(name.xor(), 64)
+        buffer.putNullTerminatedString(key.xor(), 64)
         buffer.putShort(type.id)
         buffer.putShort(unk1)
         buffer.putShort(unk2)

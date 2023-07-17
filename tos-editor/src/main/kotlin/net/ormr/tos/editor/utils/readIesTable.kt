@@ -40,6 +40,7 @@ fun openIesEditorView(file: Path) {
         tosEditorConfig.lastIesFile = file
         IesEditorFragment(file).openWindow(
             escapeClosesWindow = false,
+            owner = null,
         )
     }
 }

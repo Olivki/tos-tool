@@ -16,10 +16,10 @@
 
 package net.ormr.tos.ies.struct
 
-import net.ormr.tos.getString
 import net.ormr.tos.getUShort
-import net.ormr.tos.ies.internal.shiftBits
+import net.ormr.tos.getXorString
 import net.ormr.tos.ies.internal.utf8SizeOf
+import net.ormr.tos.ies.internal.xor
 import net.ormr.tos.putUShort
 import java.nio.ByteBuffer
 import kotlin.String as KString
@@ -51,12 +51,12 @@ sealed class IesStructDataType(val id: Short, val name: KString) {
     sealed class String(id: Short, name: KString) : IesStructDataType(id, name) {
         override fun decodeFrom(buffer: ByteBuffer): KString {
             val length = buffer.getUShort().toInt()
-            return buffer.getString(length).shiftBits()
+            return buffer.getXorString(length)
         }
 
         override fun encodeTo(buffer: ByteBuffer, value: Any) {
             require(value is KString) { "Value must be of type 'String', was '${value.javaClass.name}'" }
-            val bytes = value.shiftBits().toByteArray()
+            val bytes = value.xor().toByteArray()
             buffer.putUShort(bytes.size.toUShort())
             buffer.put(bytes)
         }
@@ -67,8 +67,11 @@ sealed class IesStructDataType(val id: Short, val name: KString) {
         }
     }
 
+    // String1 - strings that will be passed through localization
+    // String2 - strings that won't be passed through localization
+
     data object String1 : String(id = 1, name = "string1")
 
-    // TODO: Rename to 'Calculated' :huh:
+    // TODO: Rename to 'Calculated'
     data object String2 : String(id = 2, name = "string2")
 }

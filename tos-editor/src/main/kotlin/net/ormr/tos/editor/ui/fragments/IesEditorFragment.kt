@@ -18,11 +18,16 @@ package net.ormr.tos.editor.ui.fragments
 
 import atlantafx.base.theme.Styles
 import atlantafx.base.theme.Tweaks
+import javafx.scene.control.Alert.AlertType.INFORMATION
 import javafx.scene.control.Label
 import javafx.scene.control.SelectionMode
 import javafx.scene.control.TableView
+import javafx.scene.control.skin.TableColumnHeader
+import javafx.scene.text.Text
+import javafx.stage.Modality
 import javafx.util.StringConverter
 import net.ormr.tos.editor.ui.controllers.IesEditorController
+import net.ormr.tos.editor.ui.controllers.IesEditorController.DataRow
 import net.ormr.tos.editor.ui.views.chooseIesFile
 import net.ormr.tos.editor.utils.addStyleClasses
 import net.ormr.tos.editor.utils.customTextField
@@ -39,8 +44,9 @@ import kotlin.io.path.name
 class IesEditorFragment(file: Path) : Fragment("IES Editor: ${file.name}") {
     private val controller = IesEditorController(file)
     private val iesTable get() = controller.iesTable
-    private lateinit var tableView: TableView<IesEditorController.DataRow>
+    private lateinit var tableView: TableView<DataRow>
 
+    // TODO: add support for adding new rows, and potentially removing rows?
     @Suppress("UNCHECKED_CAST")
     override val root = borderpane {
         prefWidth = 1280.0
@@ -63,21 +69,43 @@ class IesEditorFragment(file: Path) : Fragment("IES Editor: ${file.name}") {
 
                 }
                 separator()
-                item("Save", keyCombination = "Ctrl+S")
-                item("Save As..", keyCombination = "Ctrl+Shift+S")
+                item("Save", keyCombination = "Ctrl+S") {
+                    action {
+                        alert(INFORMATION, "Not Implemented", "This feature is not implemented yet.")
+                    }
+                }
+                item("Save As..", keyCombination = "Ctrl+Shift+S") {
+                    action {
+                        alert(INFORMATION, "Not Implemented", "This feature is not implemented yet.")
+                    }
+                }
             }
             menu("Settings")
+            menu("Table") {
+                menu("Columns")
+                item("Open Info..") {
+                    action {
+                        IesEditorInfoFragment(iesTable).openWindow(
+                            modality = Modality.WINDOW_MODAL,
+                        )
+                    }
+                }
+            }
         }
         center = vbox {
-            tableView = tableview<IesEditorController.DataRow> {
+            tableView = tableview<DataRow> {
                 addStyleClasses(Styles.STRIPED, Styles.BORDERED, Styles.DENSE, Tweaks.EDGE_TO_EDGE)
+                column(title = "Row ID", DataRow::idProperty)
+                // TODO: limit size of row key to the correct max utf8 length
+                column(title = "Row Key", DataRow::keyProperty)
                 for ((i, column) in iesTable.columns.sortedWith(IesColumn.BINARY_COMPARATOR).withIndex()) {
+                    val title = column.key
                     when (column.type) {
-                        is IesType.Float32 -> column(column.name) {
-                            controller.getFloatProperty(it.value.data[i])
+                        is IesType.Float32 -> column(title) {
+                            controller.getFloatProperty(it.value.getColumn(i))
                         }.useTextField(FloatConverter as StringConverter<Number>)
-                        is IesType.String -> column(column.name) {
-                            controller.getStringProperty(it.value.data[i])
+                        is IesType.String -> column(title) {
+                            controller.getStringProperty(it.value.getColumn(i))
                         }.makeEditable()
                     }
                 }
@@ -95,14 +123,66 @@ class IesEditorFragment(file: Path) : Fragment("IES Editor: ${file.name}") {
         }
     }
 
-    override fun onBeforeShow() {
+    override fun onDock() {
         val node = MaskPane().apply {
             center = Label("Loading..")
         }
         root.runAsyncWithOverlay(node) {
-            controller.dataRows
+            controller.load()
         } success {
-            tableView.items = it
+            tableView.items = controller.dataRows
+            title =
+                "IES Editor: ${controller.file.name} (${iesTable.columns.size} columns, ${iesTable.rows.size} rows)"
+            // TODO: this is naive in case 'Row ID' is not the first column for some reason
+            tableView.sortOrder.add(tableView.columns[0])
+            // because JavaFX is such a good framework, we have to do this to add tooltips to the column headers
+            tableView
+                .lookupAll(".column-header")
+                .asSequence()
+                .filterIsInstance<TableColumnHeader>()
+                .forEach { header ->
+                    val label = header.lookup(".label") as? Label
+                    if (label != null) {
+                        val columnKey = label.text
+                        label.contextmenu {
+                            item(name = "Minimize") {
+                                action {
+                                    val tableColumn = header.tableColumn
+                                    tableColumn.prefWidth = tableColumn.minWidth
+                                }
+                            }
+                        }
+                        if (columnKey.startsWith("Row")) return@forEach
+                        val column = controller.getColumn(columnKey)
+                        label.text = controller.getTitle(column)
+                        val tooltipText = when {
+                            controller.hasDuplicatedName(columnKey) -> column.name
+                            else -> column.key
+                        }
+                        label.tooltip(text = tooltipText)
+                    }
+                }
+            // god i love javafx so much
+            tableView.columnResizePolicy = TableView.UNCONSTRAINED_RESIZE_POLICY
+            tableView.columns.forEach { column ->
+                // TODO: add enough space for the title to show up
+                val title = Text(column.text)
+                val titleWidth = title.layoutBounds.width
+                var width = titleWidth
+                for (i in 0..<tableView.items.size) {
+                    //cell must not be empty
+                    if (column.getCellData(i) != null) {
+                        val text = Text(column.getCellData(i).toString())
+                        val textWidth = text.layoutBounds.width
+                        if (textWidth > width) {
+                            width = textWidth
+                        }
+                    }
+                }
+                //set the new max-widht with some extra space
+                //column.setPrefWidth(width.coerceAtLeast(titleWidth) + 10.0)
+                column.setPrefWidth(width.coerceAtLeast(titleWidth) + 10.0)
+            }
         }
     }
 
@@ -114,6 +194,4 @@ class IesEditorFragment(file: Path) : Fragment("IES Editor: ${file.name}") {
 
         override fun fromString(string: String?): Float = if (string.isNullOrBlank()) 0F else string.toFloat()
     }
-
-
 }

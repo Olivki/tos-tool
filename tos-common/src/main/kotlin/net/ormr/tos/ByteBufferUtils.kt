@@ -36,6 +36,18 @@ fun ByteBuffer.getBytes(size: Int): ByteArray {
 
 fun ByteBuffer.getString(length: Int, charset: Charset = Charsets.UTF_8): String = String(getBytes(length), charset)
 
+fun ByteBuffer.getXorString(length: Int): String {
+    val bytes = getBytes(length)
+    xorBytes(bytes)
+    return String(bytes)
+}
+
+private fun xorBytes(bytes: ByteArray) {
+    for (i in bytes.indices) {
+        bytes[i] = (bytes[i].toInt() xor 0x1).toByte()
+    }
+}
+
 fun ByteBuffer.putString(value: String, charset: Charset = Charsets.UTF_8): ByteBuffer = put(value.toByteArray(charset))
 
 

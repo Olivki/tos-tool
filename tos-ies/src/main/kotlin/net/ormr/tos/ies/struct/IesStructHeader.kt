@@ -22,16 +22,16 @@ import java.nio.ByteBuffer
 
 class IesStructHeader(val table: IesStructTable) : IesStruct {
     lateinit var name: String // 128 byte length name
-    var flag1: Int = 0
-    var columnSize: Int = 0
-    var rowSize: Int = 0
-    var fileSize: Int = 0
-    var flag2: Short = 0
-    var rowCount: Short = 0
-    var columnCount: Short = 0
-    var intColumns: Short = 0
-    var stringColumns: Short = 0
-    var unkColumns: Short = 0
+    var flag1: Int = 0 // version?
+    var columnSize: Int = 0 // infoSize
+    var rowSize: Int = 0 // dataSize
+    var fileSize: Int = 0 // totalSize
+    var flag2: Short = 0 // useClassId?
+    var rowCount: Short = 0 // numField
+    var columnCount: Short = 0 // numColumn
+    var intColumns: Short = 0 // numColumnNumber
+    var stringColumns: Short = 0 // numColumnString
+    var unkColumns: Short = 0 // potentially 'char moduleSpace[64]'
 
     override fun readFrom(buffer: ByteBuffer) {
         name = buffer.getNullTerminatedString(128)

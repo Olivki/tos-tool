@@ -18,8 +18,8 @@ package net.ormr.tos.ies.struct
 
 import net.ormr.tos.getString
 import net.ormr.tos.getUShort
-import net.ormr.tos.ies.internal.shiftBits
 import net.ormr.tos.ies.internal.utf8SizeOf
+import net.ormr.tos.ies.internal.xor
 import net.ormr.tos.putUShort
 import java.nio.ByteBuffer
 import net.ormr.tos.ies.struct.IesStructDataType.Float32 as IesFloat32
@@ -27,15 +27,16 @@ import net.ormr.tos.ies.struct.IesStructDataType.String1 as IesString1
 import net.ormr.tos.ies.struct.IesStructDataType.String2 as IesString2
 
 class IesStructRow(val table: IesStructTable) : IesStruct {
-    var id: Int = 0
-    lateinit var key: String
+    var id: Int = 0 // classId
+    lateinit var key: String // className
     lateinit var entries: Array<IesStructData>
 
     override fun readFrom(buffer: ByteBuffer) {
         id = buffer.getInt() // TODO: UInt
-        key = buffer.getString(length = buffer.getUShort().toInt()).shiftBits()
+        key = buffer.getString(length = buffer.getUShort().toInt()).xor()
         val entries = mutableListOf<IesStructData>()
         val sortedColumns = table.sortedColumns
+        // number columns -> buffer.position() + (Float.SIZE_BYTES * table.header.numColumnNumber)
         for (i in 0..<table.header.columnCount.toInt()) {
             val column = sortedColumns[i]
             entries += IesStructData(column) {
@@ -54,7 +55,7 @@ class IesStructRow(val table: IesStructTable) : IesStruct {
 
     override fun writeTo(buffer: ByteBuffer) {
         buffer.putInt(id)
-        val keyBytes = key.shiftBits().toByteArray()
+        val keyBytes = key.xor().toByteArray()
         buffer.putUShort(keyBytes.size.toUShort())
         buffer.put(keyBytes)
         for (entry in entries) {

@@ -49,7 +49,9 @@ class IesTestCommand : CliktCommand(name = "test") {
 
     @OptIn(ExperimentalPathApi::class)
     override fun run() {
-        val files = input.walk().toList()
+        //val files = input.walk().toList()
+        val boys = listOf("ies", "ies2", "iesOLD", "ies_client", "ies_ability", "ies_drop", "ies_mongen")
+        val files = boys.flatMap { input.resolve(it).walk().filter { f -> f.name.endsWith(".ies") }.toList() }
         if (files.isEmpty()) {
             echo("No files found")
             return
@@ -59,21 +61,54 @@ class IesTestCommand : CliktCommand(name = "test") {
         }
         t.cursor.hide(showOnExit = true)
         for ((i, file) in files.withIndex()) {
+            progress.update(Progress(file.relativeTo(input).toString(), files.size, i + 1))
             testFile(file)
-            progress.update(Progress(file.name, files.size, i + 1))
         }
         progress.stop()
         output.deleteRecursively()
+        println(things)
+        println(things2)
     }
 
     private data class Progress(val currentFile: String, val total: Int, val current: Int)
 
+    private val things = hashSetOf<Short>()
+    private val things2 = hashMapOf<Short, String>()
+
     private fun testFile(file: Path) {
-        val binaryTable = file.readBytes()
+        val table = readIesTable(file)
+        if (table.header.unknown != 0.toShort()) {
+            echo("Unknown header value for file ${file.name}")
+        }
+        if (table.header.flag1 != 1) {
+            echo("Flag1 header value for file ${file.name}")
+        }
+        /*if (table.header.flag2 == 0.toShort() && table.header.flag2 != 1.toShort()) {
+            echo("Flag2 header value for file ${file.name}: ${table.header.flag2}")
+        }*/
+        for ((i, column) in table.columns.withIndex()) {
+            things.add(column.unk1)
+            val key = column.key
+            if (key.length >= 3 && column.unk1 != 3.toShort()) {
+                if (key[2] == '_') {
+                    val prefix = key.take(2)
+                    val knownPrefix = things2[column.unk1]
+                    if (knownPrefix != null && knownPrefix != prefix) {
+                        echo("Unknown prefix for file ${file.relativeTo(input)}/${column.name}:$i: $prefix")
+                    } else {
+                        things2[column.unk1] = prefix
+                    }
+                }
+            }
+            if (column.unk2 != 0.toShort() && column.unk2 != 1.toShort()) {
+                echo("Unknown column value for file ${file.relativeTo(input)}/${column.name}:$i: ${column.unk2}")
+            }
+        }
+        /*val binaryTable = file.readBytes()
         val xmlTable = getBytes(file)
         if (!binaryTable.contentEquals(xmlTable)) {
             error("Binary and XML table do not match for file ${file.name}")
-        }
+        }*/
     }
 
     private fun writeIesTable(table: IesTable, output: Path) {
