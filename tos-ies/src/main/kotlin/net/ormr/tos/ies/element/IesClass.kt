@@ -18,8 +18,8 @@ package net.ormr.tos.ies.element
 
 data class IesClass(
     val classID: UInt,
-    val className: String, // TODO: this can potentially be empty, should we represent that as null?
+    val className: String?,
     val fields: List<IesField<*, *>>,
 ) {
-    fun getField(name: String): IesField<*, *> = fields.first { it.name == name }
+    fun getField(name: String): IesField<*, *> = fields.single { it.name == name }
 }

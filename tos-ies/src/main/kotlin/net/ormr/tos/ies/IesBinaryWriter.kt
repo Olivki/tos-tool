@@ -69,7 +69,7 @@ object IesBinaryWriter {
             val usesScriptFunctions = stringFields.mapToBooleanArray(IesStringField<*>::usesScriptFunction)
             IesStructClass(
                 classID = clz.classID,
-                className = clz.className,
+                className = clz.className ?: "",
                 numbers = numbers,
                 strings = strings,
                 usesScriptFunctions = usesScriptFunctions,

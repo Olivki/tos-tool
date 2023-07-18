@@ -61,7 +61,7 @@ object IesBinaryReader {
                     fieldsArray[arrayIndex] = field
                 }
                 val fields = fieldsArray.requireNoNulls().asList()
-                add(IesClass(classID = clz.classID, className = clz.className, fields = fields))
+                add(IesClass(classID = clz.classID, className = clz.className.ifEmpty { null }, fields = fields))
             }
         }
         return Ies(

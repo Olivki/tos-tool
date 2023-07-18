@@ -36,5 +36,9 @@ internal fun IesClass.calculateSize(): Int {
     val strings = fields.filterIsInstance<IesStringField<*>>()
     val stringsSize = strings.sumOf { UShort.SIZE_BYTES + (it.value?.utf8Length ?: 0) }
     val usesScriptFunctionsSize = strings.size * Byte.SIZE_BYTES
-    return UInt.SIZE_BYTES + (UShort.SIZE_BYTES + className.utf8Length) + numbersSize + stringsSize + usesScriptFunctionsSize
+    return UInt.SIZE_BYTES +
+            (UShort.SIZE_BYTES + (className?.utf8Length ?: 0)) +
+            numbersSize +
+            stringsSize +
+            usesScriptFunctionsSize
 }
