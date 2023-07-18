@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.ies.struct
+package net.ormr.tos.ies.element
 
-import java.nio.ByteBuffer
-
-sealed interface IesStruct {
-    fun readFrom(buffer: ByteBuffer)
-
-    fun writeTo(buffer: ByteBuffer)
-
-    fun getSize(): Int
+data class IesClass(
+    val classID: UInt,
+    val className: String, // TODO: this can potentially be empty, should we represent that as null?
+    val fields: List<IesField<*, *>>,
+) {
+    fun getField(name: String): IesField<*, *> = fields.first { it.name == name }
 }

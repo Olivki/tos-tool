@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.cli.ies.serializer
+package net.ormr.tos.ies.internal
 
-import net.ormr.tos.ies.element.IesTable
-import java.nio.file.Path
+internal inline fun <T, reified R> List<T>.mapToArray(transform: (T) -> R): Array<R> =
+    Array(size) { transform(get(it)) }
 
-sealed interface IesSerializer {
-    fun encodeToFile(table: IesTable, file: Path)
+internal inline fun <T> List<T>.mapToFloatArray(transform: (T) -> Float): FloatArray =
+    FloatArray(size) { transform(get(it)) }
 
-    fun decodeFromFile(file: Path): IesTable
-}
+internal inline fun <T> List<T>.mapToBooleanArray(transform: (T) -> Boolean): BooleanArray =
+    BooleanArray(size) { transform(get(it)) }

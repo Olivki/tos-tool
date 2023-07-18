@@ -16,42 +16,20 @@
 
 package net.ormr.tos.ies.element
 
-import net.ormr.tos.ies.internal.element.IesColumnImpl
+import net.ormr.tos.ies.IesKind
+import net.ormr.tos.ies.IesType
 
-interface IesColumn<T : Any> : IesElement {
-    var name: String // 64 bytes
-    var key: String // 64 bytes // should be unique
-    val type: IesType<T>
-    var position: Short
-    var unk1: Short
-    var unk2: Short
-
-    companion object {
-        val VISUAL_COMPARATOR: Comparator<IesColumn<*>> = Comparator { o1, o2 ->
-            when {
-                o1.position > o2.position -> 1
-                o1.position < o2.position -> -1
-                o1.type.id > o2.type.id -> 1
-                o1.type.id < o2.type.id -> -1
-                else -> 0
-            }
-        }
-
-        val BINARY_COMPARATOR: Comparator<IesColumn<*>> = Comparator { o1, o2 ->
-            when {
-                o1.type.isSameTypeAs(o2.type) -> o1.position.compareTo(o2.position)
-                o1.type.id < o2.type.id -> -1
-                else -> 1
-            }
-        }
+data class IesColumn<T : IesType<*>>(
+    val stringKey: String,
+    val name: String,
+    val type: T,
+    val kind: IesKind,
+    val isStatic: Boolean,
+    val index: UShort,
+) : Comparable<IesColumn<*>> {
+    override fun compareTo(other: IesColumn<*>): Int = when {
+        type.isSameTypeAs(other.type) -> index.compareTo(other.index)
+        type.id < other.type.id -> -1
+        else -> 1
     }
 }
-
-fun <T : Any> IesColumn(
-    name: String,
-    key: String,
-    type: IesType<T>,
-    position: Short,
-    unk1: Short,
-    unk2: Short,
-): IesColumn<T> = IesColumnImpl(name, key, type, position, unk1, unk2)

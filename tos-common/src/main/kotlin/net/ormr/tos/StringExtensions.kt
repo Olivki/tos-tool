@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.cli.ies
+package net.ormr.tos
 
-import java.nio.file.Path
+import com.google.common.base.Utf8
 
-sealed interface IesOutputParent {
-    val output: Path
-}
+inline val String.utf8Length: Int
+    get() = Utf8.encodedLength(this)

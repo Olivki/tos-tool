@@ -1,17 +1,57 @@
 #pragma endian little
+#include <std/string.pat>
+
+fn xor_string(str content) {
+    str newContent;
+    for (u32 i = 0, i < std::string::length(content), i = i + 1) {
+        newContent = newContent + char(std::string::at(content, i) ^ 1);
+    }
+    return newContent;
+};
+
+// TODO: just get rid of the null termination in the struct instead of doing it here
+fn format_null_terminated_string(str value) {
+    if (std::string::length(value) == 0) {
+        return "";
+    }
+    str newValue;
+    u32 count = 0;
+    char currentChar;
+    while (true) {
+        currentChar = std::string::at(value, count);
+        if (currentChar == 0) break;
+        newValue = newValue + currentChar;
+        count = count + 1;
+    }
+    return newValue;
+};
+
+fn format_null_terminated_xor_string(str value) {
+    return xor_string(format_null_terminated_string(value));
+};
+
+fn format_2_byte_bool(u16 value) {
+    return value != 0;
+};
+
+using IesString;
+
+fn format_ies_string(IesString string) {
+    return xor_string(string.content);
+};
 
 struct IesHeader {
-    char id[64];
-    char keyid[64];
+    char id[64] [[format("format_null_terminated_string")]];
+    char keyID[64] [[format("format_null_terminated_string")]];
     u32 version;
-    u32 infoSize; // columnSize
-    u32 dataSize; // rowSize
-    u32 totalSize; // fileSize
+    u32 columnSize;
+    u32 classSize;
+    u32 totalSize;
     u16 useClassID [[format("format_2_byte_bool")]]; // bool
-    u16 numField; // rowCount
-    u16 numColumn; // columnCount
-    u16 numColumnNumber; // intColumns
-    u16 numColumnString; // stringColumns
+    u16 classCount;
+    u16 columnCount;
+    u16 numberColumnsCount;
+    u16 stringColumnsCount;
     padding[2];
 } [[static]];
 
@@ -21,50 +61,40 @@ enum IesType : u16 {
     Computed
 };
 
-enum IesAccess : u16 {
+enum IesKind : u16 {
     EP,
     CP,
+    VP,
     Normal,
     CT,
-};
-
-struct IesColumn {
-    char name[64];
-    char key[64];
-    IesType type;
-    IesAccess access;
-    u16 isStatic [[format("format_2_byte_bool")]]; // 2 byte wide bool
-    u16 declIdx;
-} [[static]];
-
-fn format_2_byte_bool(u16 value) {
-    return value != 0;
-};
-
-using IesString;
-
-struct IesField {
-    u32 classID;
-    u16 classNameLength;
-    char className[classNameLength];
-    float numbers[parent.header.numColumnNumber];
-    IesString strings[parent.header.numColumnString];
-    bool useScrFuncs[parent.header.numColumnString];
 };
 
 struct IesString {
     u16 length;
     char content[length];
-} [[format_read("format_ies_string")]];
+} [[format("format_ies_string")]];
 
-fn format_ies_string(IesString string) {
-    return string.content;
+struct IesColumn {
+    char stringKey[64] [[format("format_null_terminated_xor_string")]];
+    char name[64] [[format("format_null_terminated_xor_string")]];
+    IesType type;
+    IesKind kind;
+    u16 isStatic [[format("format_2_byte_bool")]]; // 2 byte wide bool
+    u16 index;
+} [[static]];
+
+struct IesClass {
+    u32 classID;
+    IesString className;
+    float numbers[parent.header.numberColumnsCount];
+    IesString strings[parent.header.stringColumnsCount];
+    bool usesScriptFunctions[parent.header.stringColumnsCount];
 };
 
 struct Ies {
     IesHeader header;
-    IesColumn columns[header.numColumn];
-    IesField fields[header.numField];
+    IesColumn columns[header.columnCount];
+    IesClass classes[header.classCount];
 } [[inline]];
 
 Ies ies @ 0x00;

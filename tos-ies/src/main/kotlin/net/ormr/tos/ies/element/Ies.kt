@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.cli.ies.serializer
+package net.ormr.tos.ies.element
 
-import net.ormr.tos.ies.element.IesTable
-import java.nio.file.Path
-
-data object IesCsvSerializer : IesSerializer {
-    override fun encodeToFile(table: IesTable, file: Path) {
-        TODO("Not yet implemented")
-    }
-
-    override fun decodeFromFile(file: Path): IesTable {
-        TODO("Not yet implemented")
-    }
-}
+data class Ies(
+    val id: String, // TODO: check if this is ever empty, it *shouldn't* be
+    val keyID: String?,
+    val useClassID: Boolean,
+    val columns: List<IesColumn<*>>,
+    val classes: List<IesClass>,
+)

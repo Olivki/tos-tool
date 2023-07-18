@@ -14,17 +14,6 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.cli.ies.format
+package net.ormr.tos.ies.internal
 
-import com.github.ajalt.clikt.parameters.groups.OptionGroup
-import net.ormr.tos.cli.ies.serializer.IesSerializer
-import net.ormr.tos.ies.element.IesTable
-import java.nio.file.Path
-
-sealed class IesFormat(name: String) : OptionGroup(name = name) {
-    abstract val serializer: IesSerializer
-
-    abstract fun load(file: Path): IesTable
-
-    abstract fun save(table: IesTable, file: Path)
-}
+internal const val DEFAULT_STRING_LENGTH = 64

@@ -5,6 +5,10 @@ plugins {
 group = "net.ormr.tos"
 version = "0.0.1"
 
+dependencies {
+    implementation(libs.guava)
+}
+
 tasks {
     test {
         useJUnitPlatform()
