@@ -21,5 +21,7 @@ data class IesClass(
     val className: String?,
     val fields: List<IesField<*, *>>,
 ) {
-    fun getField(name: String): IesField<*, *> = fields.single { it.name == name }
+    private val fieldCache: Map<String, IesField<*, *>> by lazy { fields.associateByTo(hashMapOf()) { it.name } }
+
+    fun getField(name: String): IesField<*, *> = fieldCache.getValue(name)
 }
