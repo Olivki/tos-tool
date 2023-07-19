@@ -16,7 +16,6 @@
 
 package net.ormr.tos.ipf.internal
 
-/** CRC-32-IEEE 802.3  */
 private const val POLYNOMIAL = -0x12477CE0
 private val LOOKUP_TABLE = IntArray(256) { i ->
     var value = i
@@ -26,4 +25,4 @@ private val LOOKUP_TABLE = IntArray(256) { i ->
     value
 }
 
-internal fun calculateCrc32(crc: Int, b: Byte): Int = LOOKUP_TABLE[crc xor b.toInt() and 0xFF] xor (crc ushr 8)
+internal fun calculateCrc32(crc: Int, byte: Byte): Int = LOOKUP_TABLE[crc xor byte.toInt() and 0xFF] xor (crc ushr 8)

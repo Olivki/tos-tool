@@ -25,7 +25,7 @@ internal object Pkware {
         0x3F, 0x20, 0x5B, 0xFF.toByte(), 0x73, 0x20, 0x68, 0x20, 0x25, 0x3F
     )
 
-    fun decrypt(buffer: ByteBuffer, password: ByteArray = PASSWORD): ByteBuffer {
+    fun decryptFrom(buffer: ByteBuffer, password: ByteArray = PASSWORD): ByteBuffer {
         val key = Key(password)
         val result = DirectByteBuffer(buffer.capacity(), order = buffer.order())
         var offset = 0
@@ -41,7 +41,24 @@ internal object Pkware {
             }
             offset++
         }
-        return result.rewind()
+        return result.flip()
+    }
+
+    fun encryptTo(target: ByteBuffer, source: ByteBuffer, password: ByteArray = PASSWORD) {
+        val key = Key(password)
+        var offset = 0
+        while (source.hasRemaining()) {
+            if (offset % 2 != 0) {
+                target.put(source.get())
+            } else {
+                val byte = source.get().toInt() // TODO: is this correct behavior?
+                val magicByte = key[2] and 0xFFFF or 0x02
+                val encrypted = byte xor (magicByte * (magicByte xor 1) shr 8 and 0xFF)
+                key.update(byte.toByte())
+                target.put(encrypted.toByte())
+            }
+            offset++
+        }
     }
 
     private class Key(password: ByteArray) {

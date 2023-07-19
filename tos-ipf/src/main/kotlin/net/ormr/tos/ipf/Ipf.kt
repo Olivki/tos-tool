@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.cli
+package net.ormr.tos.ipf
 
-import com.github.ajalt.clikt.core.subcommands
-import net.ormr.tos.cli.ies.IesCommand
-import net.ormr.tos.cli.ies.IesPackCommand
-import net.ormr.tos.cli.ies.IesUnpackCommand
-import net.ormr.tos.cli.ipf.IpfCommand
-import net.ormr.tos.cli.ipf.IpfUnpackCommand
+import java.nio.ByteBuffer
 
-fun main(args: Array<String>) = TosCommand()
-    .subcommands(
-        IesCommand().subcommands(IesUnpackCommand(), IesPackCommand()),
-        IpfCommand().subcommands(IpfUnpackCommand()),
-    )
-    .main(args)
+data class Ipf(
+    val buffer: ByteBuffer,
+    val subversion: UInt = 0u,
+    val version: UInt = 0u,
+    val elements: List<IpfElement>,
+)
+
+data class IpfElement(
+    val crc: Int,
+    val compressedSize: Int,
+    val uncompressedSize: Int,
+    val fileOffset: Int,
+    val archiveName: String,
+    val path: String,
+) {
+    fun isCompressed(): Boolean = compressedSize != uncompressedSize
+}
