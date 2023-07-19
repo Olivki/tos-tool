@@ -45,7 +45,7 @@ internal class IesStructColumn(
     val name: String, // 64
     val type: IesType<*>, // UShort
     val kind: IesKind, // UShort
-    val isStatic: Boolean, // UShort
+    val isNT: Boolean, // UShort
     val index: UShort,
 ) : Comparable<IesStructColumn> {
     override fun compareTo(other: IesStructColumn): Int = when {

@@ -24,7 +24,7 @@ data class IesColumn<T : IesType<*>>(
     val name: String,
     val type: T,
     val kind: IesKind,
-    val isStatic: Boolean,
+    val isNT: Boolean,
     val index: UShort,
 ) : Comparable<IesColumn<*>> {
     override fun compareTo(other: IesColumn<*>): Int = when {

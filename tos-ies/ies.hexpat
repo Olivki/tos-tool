@@ -79,7 +79,7 @@ struct IesColumn {
     char name[64] [[format("format_null_terminated_xor_string")]];
     IesType type;
     IesKind kind;
-    u16 isStatic [[format("format_2_byte_bool")]]; // 2 byte wide bool
+    u16 isNT [[format("format_2_byte_bool")]]; // 2 byte wide bool
     u16 index;
 } [[static]];
 

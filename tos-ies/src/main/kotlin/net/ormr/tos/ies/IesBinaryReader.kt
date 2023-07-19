@@ -86,7 +86,7 @@ object IesBinaryReader {
         name = name,
         type = type,
         kind = kind,
-        isStatic = isStatic,
+        isNT = isNT,
         index = index,
     )
 
@@ -148,14 +148,14 @@ object IesBinaryReader {
         val key = buffer.getNullTerminatedXorString(DEFAULT_STRING_LENGTH)
         val type = IesType.fromId(buffer.getUShort())
         val kind = IesKind.fromId(buffer.getUShort())
-        val isStatic = buffer.get2ByteBoolean()
+        val isNT = buffer.get2ByteBoolean()
         val index = buffer.getUShort()
         return IesStructColumn(
             stringKey = name,
             name = key,
             type = type,
             kind = kind,
-            isStatic = isStatic,
+            isNT = isNT,
             index = index,
         )
     }

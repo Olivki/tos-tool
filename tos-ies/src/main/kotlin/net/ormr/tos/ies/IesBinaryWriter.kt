@@ -31,11 +31,11 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption.*
 
 object IesBinaryWriter {
-    fun writeTo(ies: Ies, target: Path) {
+    fun writeTo(target: Path, ies: Ies) {
         writeIesStruct(ies.toIesStruct(), target)
     }
 
-    fun writeTo(ies: Ies, target: ByteBuffer) {
+    fun writeTo(target: ByteBuffer, ies: Ies) {
         writeIesStruct(ies.toIesStruct(), target)
     }
 
@@ -100,7 +100,7 @@ object IesBinaryWriter {
         name = name,
         type = type,
         kind = kind,
-        isStatic = isStatic,
+        isNT = isNT,
         index = index,
     )
 
@@ -157,7 +157,7 @@ object IesBinaryWriter {
         buffer.putNullTerminatedXorString(column.name, DEFAULT_STRING_LENGTH)
         buffer.putUShort(column.type.id)
         buffer.putUShort(column.kind.id)
-        buffer.put2ByteBoolean(column.isStatic)
+        buffer.put2ByteBoolean(column.isNT)
         buffer.putUShort(column.index)
     }
 
