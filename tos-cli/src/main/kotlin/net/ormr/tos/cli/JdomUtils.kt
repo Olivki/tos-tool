@@ -65,8 +65,8 @@ internal inline fun <T> Document.use(scope: (doc: Document, root: Element) -> T)
 internal inline fun createDocument(
     rootName: String,
     rootNamespace: Namespace = Namespace.NO_NAMESPACE,
-    builder: Element.() -> Unit = {},
-): Document = Document(Element(rootName, rootNamespace)).apply { rootElement.builder() }
+    builder: Element.(Document) -> Unit = {},
+): Document = Document(Element(rootName, rootNamespace)).apply { rootElement.builder(this) }
 
 // TODO: context instead of receiver element
 inline fun Element.element(

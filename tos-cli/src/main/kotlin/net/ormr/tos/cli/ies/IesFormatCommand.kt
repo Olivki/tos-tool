@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.cli
+package net.ormr.tos.cli.ies
 
-import com.github.ajalt.clikt.core.subcommands
-import net.ormr.tos.cli.ies.IesCommand
-import net.ormr.tos.cli.ies.IesPackCommand
-import net.ormr.tos.cli.ies.IesUnpackCommand
-import net.ormr.tos.cli.ipf.IpfCommand
-import net.ormr.tos.cli.ipf.IpfUnpackCommand
+import java.nio.file.Path
 
-fun main(args: Array<String>) = TosCommand()
-    .subcommands(
-        IesCommand().subcommands(IesUnpackCommand(), IesPackCommand()),
-        IpfCommand().subcommands(IpfUnpackCommand()),
-    )
-    .main(args)
+sealed interface IesFormatCommand {
+    val output: Path
+}
