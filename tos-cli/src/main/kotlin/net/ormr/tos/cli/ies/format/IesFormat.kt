@@ -19,6 +19,8 @@ package net.ormr.tos.cli.ies.format
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
 import net.ormr.tos.cli.ies.IesFormatCommand
 import net.ormr.tos.ies.element.Ies
+import net.ormr.tos.ies.element.IesColumn
+import net.ormr.tos.ies.element.IesField
 import java.nio.file.Path
 
 sealed class IesFormat(name: String, protected val command: IesFormatCommand) : OptionGroup(name = name) {
@@ -27,4 +29,8 @@ sealed class IesFormat(name: String, protected val command: IesFormatCommand) : 
     abstract fun loadFrom(file: Path): Ies
 
     abstract fun writeTo(file: Path, ies: Ies)
+
+    protected fun IesColumn<*>.isManualColumn(): Boolean = name == "ClassID" || name == "ClassName"
+
+    protected fun IesField<*, *>.isManualField(): Boolean = name == "ClassID" || name == "ClassName"
 }

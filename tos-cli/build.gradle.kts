@@ -4,6 +4,10 @@ plugins {
     application
 }
 
+repositories {
+    maven(url = "https://jitpack.io")
+}
+
 dependencies {
     implementation(project(":tos-common"))
     implementation(project(":tos-ies"))

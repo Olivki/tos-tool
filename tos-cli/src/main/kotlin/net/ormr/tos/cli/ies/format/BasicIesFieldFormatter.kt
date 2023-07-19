@@ -31,6 +31,8 @@ class BasicIesFieldFormatter private constructor(private val intLikeNumbers: Set
         is IesStringField<*> -> field.value ?: DEFAULT_STRING
     }
 
+    fun isIntLike(name: String): Boolean = name in intLikeNumbers
+
     companion object {
         fun using(classes: List<IesClass>): BasicIesFieldFormatter {
             val potentialInts = hashMapOf<String, Boolean>()
