@@ -79,7 +79,11 @@ object IesBinaryReader {
         field: IesStructClass,
         index: Int,
         constructor: (IesColumn<T>, String?, Boolean) -> V,
-    ): V = constructor(column as IesColumn<T>, field.strings[index].ifEmpty { null }, field.usesScriptFunctions[index])
+    ): V = constructor(
+        column as IesColumn<T>,
+        field.strings[index].ifEmpty { null },
+        field.usesScriptFunctions[index],
+    )
 
     private fun IesStructColumn.toIesColumn(): IesColumn<*> = IesColumn(
         stringKey = stringKey,
@@ -123,8 +127,8 @@ object IesBinaryReader {
         val columnCount = buffer.getUShort()
         val numberColumnsCount = buffer.getUShort()
         val stringColumnsCount = buffer.getUShort()
-        check(columnCount == (numberColumnsCount + stringColumnsCount).toUShort()) {
-            "Number of number columns and string columns must equal column count. ($columnCount != $numberColumnsCount + $stringColumnsCount)"
+        check((numberColumnsCount + stringColumnsCount).toUShort() == columnCount) {
+            "(numberColumnsCount ($numberColumnsCount) + stringColumnsCount ($stringColumnsCount)) != columnCount ($columnCount)"
         }
         // checking around 4k files, this is always two bytes of 0
         buffer.skipPadding(2)
