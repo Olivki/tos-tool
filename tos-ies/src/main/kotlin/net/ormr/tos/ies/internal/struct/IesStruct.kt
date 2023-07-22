@@ -28,7 +28,7 @@ internal class IesStruct(
 internal class IesStructHeader(
     val id: String, // 64
     val keyID: String, // 64
-    val version: UInt,
+    val version: UInt, // TODO: probably not UInt, but UShort
     val columnSize: UInt,
     val classSize: UInt,
     val totalSize: UInt,
