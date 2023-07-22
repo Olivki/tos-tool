@@ -62,7 +62,7 @@ class IpfUnpackCommand : CliktCommand(name = "unpack") {
             return
         }
         val fileWord = if (files.size == 1) "file" else "files"
-        echo("Extracting ${blue(files.size.toString())} $fileWord using ${blue(threadsCount.toString())} threads...")
+        echo("Unpacking ${blue(files.size.toString())} $fileWord using ${blue(threadsCount.toString())} threads...")
         files.forEach(::unpackIpfFile)
         pool.shutdown()
     }

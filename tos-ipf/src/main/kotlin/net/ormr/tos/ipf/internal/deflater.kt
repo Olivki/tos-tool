@@ -16,7 +16,22 @@
 
 package net.ormr.tos.ipf.internal
 
-internal const val TAIL_SIZE = 0x18
-internal const val ENCODED_START_VERSION = 11_035u
-internal val ZIP_MAGIC = byteArrayOf(0x50, 0x4B, 0x05, 0x06)
-internal val NO_COMPRESSION: Set<String> = hashSetOf(".mp3", ".fsb", ".jpg", ".JPG")
+import net.ormr.tos.DirectByteBuffer
+import net.ormr.tos.orderAwareDuplicate
+import java.nio.ByteBuffer
+import java.util.zip.Deflater
+
+internal fun ByteBuffer.deflate(compressionLevel: Int): ByteBuffer {
+    val deflater = Deflater(compressionLevel, true)
+    return try {
+        deflater.setInput(orderAwareDuplicate())
+        deflater.finish()
+        val result = DirectByteBuffer(limit(), order())
+        val bytesWritten = deflater.deflate(result)
+        check(bytesWritten > 0) { "Failed to deflate buffer" }
+        result.position(0)
+        result.limit(bytesWritten)
+    } finally {
+        deflater.end()
+    }
+}

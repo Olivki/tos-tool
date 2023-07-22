@@ -20,11 +20,14 @@ import net.ormr.tos.DirectByteBuffer
 import java.nio.ByteBuffer
 import java.util.zip.Inflater
 
-internal fun ByteBuffer.inflateTo(expectedSize: Int): ByteBuffer {
+internal fun ByteBuffer.inflate(expectedSize: Int): ByteBuffer {
     val inflater = Inflater(true)
-    inflater.setInput(this)
-    val result = DirectByteBuffer(expectedSize, order())
-    inflater.inflate(result)
-    result.position(0)
-    return result
+    return try {
+        inflater.setInput(this)
+        val result = DirectByteBuffer(expectedSize, order())
+        inflater.inflate(result)
+        result
+    } finally {
+        inflater.end()
+    }
 }

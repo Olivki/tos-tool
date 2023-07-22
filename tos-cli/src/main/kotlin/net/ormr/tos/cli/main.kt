@@ -21,11 +21,12 @@ import net.ormr.tos.cli.ies.IesCommand
 import net.ormr.tos.cli.ies.IesPackCommand
 import net.ormr.tos.cli.ies.IesUnpackCommand
 import net.ormr.tos.cli.ipf.IpfCommand
+import net.ormr.tos.cli.ipf.IpfPackCommand
 import net.ormr.tos.cli.ipf.IpfUnpackCommand
 
 fun main(args: Array<String>) = TosCommand()
     .subcommands(
         IesCommand().subcommands(IesUnpackCommand(), IesPackCommand()),
-        IpfCommand().subcommands(IpfUnpackCommand()),
+        IpfCommand().subcommands(IpfUnpackCommand(), IpfPackCommand()),
     )
     .main(args)

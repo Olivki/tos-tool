@@ -27,6 +27,8 @@ internal const val EMPTY_STRING = ""
 
 fun ByteBuffer.orderAwareSlice(): ByteBuffer = slice().order(order())
 
+fun ByteBuffer.orderAwareDuplicate(): ByteBuffer = duplicate().order(order())
+
 fun ByteBuffer.copyBuffer(): ByteBuffer {
     val buffer = DirectByteBuffer(capacity(), order())
     buffer.put(this)

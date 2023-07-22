@@ -16,8 +16,9 @@
 
 package net.ormr.tos.ipf
 
+import net.ormr.tos.ipf.internal.ENCODED_START_VERSION
 import net.ormr.tos.ipf.internal.Pkware
-import net.ormr.tos.ipf.internal.inflateTo
+import net.ormr.tos.ipf.internal.inflate
 import java.nio.ByteBuffer
 import java.nio.ByteOrder.LITTLE_ENDIAN
 import java.nio.channels.FileChannel
@@ -37,11 +38,11 @@ class IpfExtractor @PublishedApi internal constructor(private val ipf: Ipf) {
         val buffer = ipf.buffer.slice(element.fileOffset, element.compressedSize).order(LITTLE_ENDIAN)
         val version = ipf.version
         val decodedBuffer = when {
-            version >= 11_035u || version == 0u -> Pkware.decryptFrom(buffer)
+            version >= ENCODED_START_VERSION || version == 0u -> Pkware.decryptFrom(buffer)
             else -> buffer
         }
         return when {
-            element.isCompressed() -> decodedBuffer.inflateTo(element.uncompressedSize)
+            element.isCompressed() -> decodedBuffer.inflate(element.uncompressedSize)
             else -> decodedBuffer
         }.order(LITTLE_ENDIAN)
     }
