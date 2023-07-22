@@ -40,7 +40,7 @@ class IesPackCommand : CliktCommand(name = "pack"), IesFormatCommand {
     private val input by argument()
         .help("Input file or directory")
         .path(mustExist = true, mustBeReadable = true, canBeDir = true, canBeFile = true, canBeSymlink = false)
-    override val output by option("-o", "--output")
+    private val output by option("-o", "--output")
         .help("Output directory")
         .path()
         .defaultLazy { Path("./packed_ies/") }
@@ -77,4 +77,11 @@ class IesPackCommand : CliktCommand(name = "pack"), IesFormatCommand {
     }
 
     private data class Progress(val currentFile: String, val total: Int, val current: Int)
+
+    override fun promptForContinue(text: String) {
+        t.prompt(
+            prompt = "$text. Continue?",
+            choices = listOf("y", "n"),
+        )
+    }
 }

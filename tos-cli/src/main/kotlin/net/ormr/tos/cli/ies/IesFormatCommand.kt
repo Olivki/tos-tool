@@ -16,8 +16,6 @@
 
 package net.ormr.tos.cli.ies
 
-import java.nio.file.Path
-
 sealed interface IesFormatCommand {
-    val output: Path
+    fun promptForContinue(text: String)
 }
