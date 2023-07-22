@@ -206,17 +206,8 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
         IesHelper.isScriptField(value),
     )
 
-    private inline fun String.hasPrefix(a: Char, b: Char, c: Char): Boolean =
-        this[0] == a && this[1] == b && this[2] == c
-
     private fun Element.attr(name: String): String =
         getAttributeValue(name) ?: error("Attribute $name not found at ${getAbsolutePath(this)}")
-
-    private fun Element.floatAttr(name: String): Float = try {
-        attr(name).toFloat()
-    } catch (e: NumberFormatException) {
-        error("Attribute $name is not a float at ${getAbsolutePath(this)}")
-    }
 
     private fun Element.child(name: String): Element =
         getChild(name) ?: error("Child $name not found at ${getAbsolutePath(this)}")
