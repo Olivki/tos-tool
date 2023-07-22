@@ -33,4 +33,6 @@ object IesHelper {
     }
 
     fun isNTColumn(name: String): Boolean = "_NT" in name
+
+    fun isScriptField(value: String): Boolean = "SCR_" in value || "SCP" in value
 }

@@ -203,9 +203,7 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
     ): V = constructor(
         column as IesColumn<T>,
         if (value == DEFAULT_STRING) null else value,
-        // TODO: handle more cases, as there's probably more than just these, or they might
-        //       be completely different
-        value.startsWith("SCR_") || value.startsWith("SCP"),
+        IesHelper.isScriptField(value),
     )
 
     private inline fun String.hasPrefix(a: Char, b: Char, c: Char): Boolean =
