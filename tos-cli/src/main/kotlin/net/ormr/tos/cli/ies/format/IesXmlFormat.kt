@@ -45,7 +45,7 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
         val root = document.rootElement
         check(root.name == "idspace")
         val id = root.attr("id")
-        val keyID = root.attr("keyid").ifEmpty { null }
+        val keyID = root.getAttributeValue("keyid")?.let { it.ifEmpty { null } }
         fillColumnTypes(root, columnTypes)
         fillColumns(root, columnTypes, columns, tracker)
         val classes = getIesClasses(root, columns, tracker)
@@ -106,7 +106,7 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
                         ?: error("Unknown column type for '$name' @ ${getAbsolutePath(attribute)}")
                     val kind = IesKind.fromKey(name)
                     val isNT = IesHelper.isNTColumn(name)
-                    val stringKey = IesHelper.columnNameToStringKey(name)
+                    val stringKey = IesHelper.columnNameToStringKey(name, kind)
                     // TODO: handle checking for static columns
                     val index = when (type) {
                         IesType.Number -> tracker.numbers++

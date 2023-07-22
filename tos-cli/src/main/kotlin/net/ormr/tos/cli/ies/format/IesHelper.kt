@@ -16,25 +16,21 @@
 
 package net.ormr.tos.cli.ies.format
 
+import net.ormr.tos.ies.IesKind
+
 object IesHelper {
     private val kindSuffixes = listOf("CT_", "VP_", "EP_", "CP_")
     private val ntSuffixes = listOf("_NT", "_NT_DS1", "_NT_DS2")
 
-    fun columnNameToStringKey(name: String): String {
-        val knownPrefix = kindSuffixes.firstOrNull(name::startsWith)
-        val knownSuffix = ntSuffixes.firstOrNull(name::endsWith)
+    fun columnNameToStringKey(name: String, kind: IesKind): String {
         var value = name
 
-        if (knownPrefix != null) {
-            value = value.drop(knownPrefix.length)
+        if (kind != IesKind.NORMAL) {
+            value = value.drop(3)
         }
 
-        if (knownSuffix != null) {
-            value = value.dropLast(knownSuffix.length)
-        }
-
-        return value
+        return value.substringBefore("_NT")
     }
 
-    fun isNTColumn(name: String): Boolean = ntSuffixes.any(name::endsWith)
+    fun isNTColumn(name: String): Boolean = "_NT" in name
 }
