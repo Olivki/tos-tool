@@ -110,10 +110,6 @@ class IpfPackCommand : CliktCommand(name = "pack") {
             }
         }
         pool.invokeAll(actions)
-        /*files.forEach { file ->
-            builder.importFile(file)
-            progress.advance(file.fileSize())
-        }*/
         builder.writeTo(output)
         Thread.sleep(300)
         progress.stop()
