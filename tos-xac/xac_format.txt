@@ -12,7 +12,7 @@ byte {4}	- Unknown (01 00 00 01)
   byte {Length}	- Chunk Data
 // end for
 
-if (Chuck Identifier == 0xD) {
+if (Chuck Identifier == 13) {
   uint32 {4}	- Unknown
   uint32 {4}	- Unknown
   uint32 {4}	- Object Count // not sure about this
