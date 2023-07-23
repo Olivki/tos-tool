@@ -25,8 +25,9 @@ internal fun ByteBuffer.inflate(expectedSize: Int): ByteBuffer {
     return try {
         inflater.setInput(this)
         val result = DirectByteBuffer(expectedSize, order())
-        inflater.inflate(result)
-        result
+        val bytesUncompressed = inflater.inflate(result)
+        check(bytesUncompressed > 0) { "Failed to inflate buffer" }
+        result.flip()
     } finally {
         inflater.end()
     }

@@ -29,8 +29,7 @@ internal fun ByteBuffer.deflate(compressionLevel: Int): ByteBuffer {
         val result = DirectByteBuffer(limit(), order())
         val bytesWritten = deflater.deflate(result)
         check(bytesWritten > 0) { "Failed to deflate buffer" }
-        result.position(0)
-        result.limit(bytesWritten)
+        result.flip()
     } finally {
         deflater.end()
     }
