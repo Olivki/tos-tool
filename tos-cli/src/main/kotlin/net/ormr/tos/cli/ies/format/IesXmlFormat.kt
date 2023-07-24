@@ -37,7 +37,7 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
 
     // TODO: looking at the files we have access to, I don't think the current system does anything with
     //       non standard xml files, so we might not want to support arbitrary nesting?
-    override fun loadFrom(file: Path): Ies {
+    override fun loadFrom(file: Path): Ies? {
         val columns = linkedMapOf<String, IesColumn<*>>()
         val columnTypes = hashMapOf<String, IesType<*>>()
         val tracker = DataTracker()

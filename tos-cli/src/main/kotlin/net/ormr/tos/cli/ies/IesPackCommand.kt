@@ -71,7 +71,7 @@ class IesPackCommand : CliktCommand(name = "pack"), IesFormatCommand {
     }
 
     private fun packFile(file: Path) {
-        val ies = format.loadFrom(file)
+        val ies = format.loadFrom(file) ?: return
         val outputFile = output / "${file.nameWithoutExtension}.ies"
         IesBinaryWriter.writeTo(outputFile, ies)
     }

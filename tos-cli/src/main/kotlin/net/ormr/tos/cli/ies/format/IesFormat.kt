@@ -26,7 +26,7 @@ import java.nio.file.Path
 sealed class IesFormat(name: String, protected val command: IesFormatCommand) : OptionGroup(name = name) {
     abstract val fileExtension: String
 
-    abstract fun loadFrom(file: Path): Ies
+    abstract fun loadFrom(file: Path): Ies?
 
     abstract fun writeTo(file: Path, ies: Ies)
 
