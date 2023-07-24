@@ -63,15 +63,22 @@ class IesPackCommand : CliktCommand(name = "pack"), IesFormatCommand {
             "Unpacking ${blue(it.currentFile)}.. ${gray("(${it.current}/${it.total})")}"
         }
         t.cursor.hide(showOnExit = true)
+        val isSingleFile = files.size == 1
         for ((i, file) in files.withIndex()) {
-            packFile(file)
+            packFile(file, isSingleFile)
             progress.update(Progress(file.name, files.size, i + 1))
         }
         progress.stop()
     }
 
-    private fun packFile(file: Path) {
-        val ies = format.loadFrom(file) ?: return
+    private fun packFile(file: Path, isSingleFile: Boolean) {
+        val ies = format.loadFrom(file)
+        if (ies == null) {
+            if (isSingleFile) {
+                t.danger("Root element of file '${file.name}' is not 'idspace' and can't be packed to an IES")
+            }
+            return
+        }
         val outputFile = output / "${file.nameWithoutExtension}.ies"
         IesBinaryWriter.writeTo(outputFile, ies)
     }

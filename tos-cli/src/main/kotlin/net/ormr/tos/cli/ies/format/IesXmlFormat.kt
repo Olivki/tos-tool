@@ -43,7 +43,8 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
         val tracker = DataTracker()
         val document = loadDocument(file)
         val root = document.rootElement
-        check(root.name == "idspace")
+        // if the loaded file isn't idspace file, we can't pack it, so we return null
+        if (root.name != "idspace") return null
         val id = root.attr("id")
         val keyID = root.getAttributeValue("keyid")?.let { it.ifEmpty { null } }
         fillColumnTypes(root, columnTypes)
