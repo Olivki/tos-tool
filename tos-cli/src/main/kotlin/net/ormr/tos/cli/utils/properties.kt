@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package net.ormr.tos.cli
+package net.ormr.tos.cli.utils
 
-import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.parameters.options.versionOption
+import java.util.*
 
-class TosCommand : CliktCommand(name = "tos") {
-    init {
-        versionOption(BuildData.version)
-    }
-
-    override fun run() {}
-}
+internal inline fun <reified T : Any> loadPropertiesFromResource(name: String): Properties =
+    T::class.java.getResourceAsStream(name)?.use {
+        val properties = Properties()
+        properties.load(it)
+        properties
+    } ?: error("Could not load properties '$name' from resource of ${T::class.java}")
