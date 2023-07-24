@@ -19,6 +19,8 @@ dependencies {
     implementation(libs.kotlinx.serialization.properties)
     implementation(libs.kotlinx.serialization.msgpack)
 
+    implementation(libs.guava)
+
     implementation(libs.krautils.core)
 
     implementation(libs.clikt)
