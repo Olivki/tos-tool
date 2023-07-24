@@ -27,7 +27,9 @@ import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.path
 import com.github.ajalt.mordant.animation.progressAnimation
 import com.github.ajalt.mordant.rendering.TextColors.blue
+import com.github.ajalt.mordant.terminal.ConversionResult
 import net.ormr.tos.cli.Sys
+import net.ormr.tos.cli.t
 import net.ormr.tos.ipf.IpfExtractor
 import net.ormr.tos.ipf.IpfReader
 import java.nio.file.Path
@@ -69,11 +71,19 @@ class IpfUnpackCommand : CliktCommand(name = "unpack") {
 
     private fun unpackIpfFile(file: Path) {
         val ipf = IpfReader.readFrom(file)
-        val archiveName = ipf.elements.first().archiveName
+        val archiveName = when {
+            !file.name.endsWith(".ipf") -> {
+                t.danger("File '${file.name}' does not end with '.ipf'.")
+                t.danger("Please enter the archive name manually.")
+                archiveNamePrompt(file) ?: error("No archive name provided")
+            }
+            else -> file.name
+        }
         val rootDirectory = output.resolve(archiveName)
         rootDirectory.createDirectories()
         val progress = currentContext.terminal.progressAnimation {
-            text(blue(file.relativeTo(input).pathString))
+            val name = if (file == input) file.name else file.relativeTo(input).pathString
+            text(blue(name))
             percentage()
             progressBar()
             completed()
@@ -94,4 +104,16 @@ class IpfUnpackCommand : CliktCommand(name = "unpack") {
         Thread.sleep(300)
         progress.stop()
     }
+
+    private fun archiveNamePrompt(file: Path): String? = prompt(
+        text = "Archive name",
+        convert = { input ->
+            when {
+                input.isBlank() -> ConversionResult.Invalid("Input cannot be blank")
+                !input.endsWith(".ipf") -> ConversionResult.Invalid("Input must end with '.ipf'")
+                else -> ConversionResult.Valid(input)
+            }
+        },
+        default = "${file.nameWithoutExtension}.ipf",
+    )
 }

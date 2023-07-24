@@ -24,10 +24,11 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder.LITTLE_ENDIAN
 import java.nio.file.Path
 import kotlin.io.path.createParentDirectories
+import kotlin.io.path.div
 
 class IpfExtractor(private val ipf: Ipf) {
     fun IpfElement.extractTo(rootDirectory: Path) {
-        val extractedFile = rootDirectory.resolve(path)
+        val extractedFile = rootDirectory / archiveName / path
         extractedFile.createParentDirectories()
         val buffer = getByteBufferFrom(this)
         extractedFile.fileWriteChannel().use { it.write(buffer) }
