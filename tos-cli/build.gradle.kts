@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":tos-xac"))
 
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.serialization.properties)
     implementation("com.ensarsarajcic.kotlinx:serialization-msgpack:0.5.4")
 
     implementation("net.ormr.krautils:krautils-core:0.2.0")

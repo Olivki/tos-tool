@@ -1,6 +1,7 @@
 [versions]
 kotlin = "1.9.0"
 kotlin-coroutines = "1.7.2"
+kotlinx-serialization = "1.5.1"
 slf4j = "1.7.26"
 
 [plugins]
@@ -14,7 +15,8 @@ jaxen = { group = "jaxen", name = "jaxen", version = "2.0.0" }
 kxml2 = { group = "net.sf.kxml", name = "kxml2", version = "2.3.0" }
 slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version.ref = "slf4j" }
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.5.1" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+kotlinx-serialization-properties = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-properties", version.ref = "kotlinx-serialization" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
 kotlinx-coroutines-javafx = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-javafx", version.ref = "kotlin-coroutines" }
 guava = { group = "com.google.guava", name = "guava", version = "32.1.1-jre" }
