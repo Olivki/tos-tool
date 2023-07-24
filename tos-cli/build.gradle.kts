@@ -17,9 +17,9 @@ dependencies {
 
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.serialization.properties)
-    implementation("com.ensarsarajcic.kotlinx:serialization-msgpack:0.5.4")
+    implementation(libs.kotlinx.serialization.msgpack)
 
-    implementation("net.ormr.krautils:krautils-core:0.2.0")
+    implementation(libs.krautils.core)
 
     implementation(libs.clikt)
 
