@@ -60,8 +60,8 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
     }
 
     private class DataTracker(
-        var numbers: UInt = 0u,
-        var strings: UInt = 0u,
+        var numbers: UShort = 0u,
+        var strings: UShort = 0u,
         var useClassID: Boolean = false,
     )
 
@@ -109,7 +109,6 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
                     val kind = IesKind.fromKey(name)
                     val isNT = IesHelper.isNTColumn(name)
                     val stringKey = IesHelper.columnNameToStringKey(name, kind)
-                    // TODO: handle checking for static columns
                     val index = when (type) {
                         IesType.Number -> tracker.numbers++
                         IesType.LocalizedString, IesType.CalculatedString -> tracker.strings++
@@ -123,6 +122,17 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
                         isNT = isNT,
                     )
                 }
+            }
+
+            if ("ClassName" !in columns) {
+                columns["ClassName"] = IesColumn(
+                    stringKey = "ClassName",
+                    name = "ClassName",
+                    type = IesType.LocalizedString,
+                    kind = IesKind.NORMAL,
+                    index = tracker.strings++,
+                    isNT = false,
+                )
             }
         }
     }
@@ -142,11 +152,15 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
                 tracker.useClassID = true
                 it.toUIntOrNull() ?: error("Invalid class ID '$it' @ ${getAbsolutePath(child)}")
             } ?: 0u
+            val hasClassName = child.getAttribute("ClassName") != null
             val className = child
                 .getAttributeValue("ClassName")
                 ?.ifEmpty { null }
                 ?.let { if (it == DEFAULT_STRING) null else it }
             val fields = buildList(child.attributes.size) {
+                if (!hasClassName) {
+                    add(IesLocalizedString(columns["ClassName"] as IesColumn<IesType.LocalizedString>, null, false))
+                }
                 for (attribute in child.attributes) {
                     val name = attribute.name
                     val value = attribute.value
