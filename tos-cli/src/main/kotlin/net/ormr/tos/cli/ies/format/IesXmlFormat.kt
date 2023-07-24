@@ -74,16 +74,17 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
             for (attribute in child.attributes) {
                 val name = attribute.name
                 val value = attribute.value
-                val type = columnTypes[name]
-                val currentType = IesType.fromKeyValue(name, value)
+                val cachedType = columnTypes[name]
+                val inferredType = IesType.fromKeyValue(name, value)
 
-                if (type != null) {
-                    if (type != currentType) {
-                        val path = getAbsolutePath(attribute)
-                        error("Type mismatch, expected '$type', but got '$currentType' @ $file -> $path")
-                    }
+                if (cachedType == null) {
+                    columnTypes[name] = inferredType
                 } else {
-                    columnTypes[name] = currentType
+                    // if a value we previously inferred as a number is used as a string,
+                    // then it's most likely a string that can contain number values, so we change it accordingly
+                    if (cachedType == IesType.Number && inferredType == IesType.LocalizedString) {
+                        columnTypes[name] = IesType.LocalizedString
+                    }
                 }
             }
         }
