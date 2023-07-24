@@ -143,8 +143,8 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
                 it.toUIntOrNull() ?: error("Invalid class ID '$it' @ ${getAbsolutePath(child)}")
             } ?: 0u
             val className = child
-                .attr("ClassName")
-                .ifEmpty { null }
+                .getAttributeValue("ClassName")
+                ?.ifEmpty { null }
                 ?.let { if (it == DEFAULT_STRING) null else it }
             val fields = buildList(child.attributes.size) {
                 for (attribute in child.attributes) {
