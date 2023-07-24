@@ -39,9 +39,10 @@ class IpfPackCommand : CliktCommand(name = "pack") {
     private val input by argument()
         .help("Input directory")
         .path(mustExist = true, mustBeReadable = true, canBeDir = true, canBeFile = false, canBeSymlink = false)
-    private val output by argument()
-        .help("Output file")
+    private val output by option("-o", "--output")
+        .help("Output file or directory")
         .path()
+        .defaultLazy { Path("./packed_ipf/") }
     private val threadsCount by option("-t", "--threads")
         .help("Number of threads to use, will default to half of the available processors")
         .int()
