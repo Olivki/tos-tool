@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
+    id("com.github.johnrengelman.shadow") version "8.1.0"
     application
 }
 
@@ -14,22 +15,15 @@ dependencies {
     implementation(project(":tos-ipf"))
     implementation(project(":tos-xac"))
 
-    implementation("org.apache.commons:commons-csv:1.10.0")
-
     implementation(libs.kotlinx.serialization.json)
     implementation("com.ensarsarajcic.kotlinx:serialization-msgpack:0.5.4")
 
     implementation("net.ormr.krautils:krautils-core:0.2.0")
-    implementation("net.ormr.krautils:krautils-compress:0.0.1")
 
     implementation(libs.clikt)
 
     implementation(libs.jdom2)
     implementation(libs.jaxen)
-
-    implementation(libs.kxml2)
-
-    implementation(libs.bundles.slf4j)
 
     testImplementation(kotlin("test"))
 }
