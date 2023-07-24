@@ -30,9 +30,7 @@ import kotlin.io.path.relativeTo
 
 class IpfFileBuilder(
     target: Path,
-    private val root: Path,
     private val compressionLevel: Int,
-    private val archiveName: String,
     private val subversion: UInt,
     private val version: UInt,
 ) {
@@ -42,7 +40,7 @@ class IpfFileBuilder(
     private val channel = target.fileWriteChannel()
     private val lock = LOCK()
 
-    fun importFile(file: Path) {
+    fun importFile(file: Path, archive: Path, archiveName: String) {
         FileChannel.open(file, READ).use { channel ->
             val buffer = channel.map(READ_ONLY, 0, channel.size()).order(LITTLE_ENDIAN)
             val compressedBuffer = when {
@@ -62,7 +60,9 @@ class IpfFileBuilder(
                     uncompressedSize = buffer.limit(),
                     fileOffset = offset.get(),
                     archiveName = archiveName,
-                    path = file.relativeTo(root).joinToString(separator = "\\") { it.name }, // TODO: correct?
+                    path = file
+                        .relativeTo(archive)
+                        .joinToString(separator = "\\") { it.name }
                 )
                 offset.addAndGet(encodedBuffer.limit())
                 elements.add(element)
@@ -81,8 +81,8 @@ class IpfFileBuilder(
             buffer.putInt(element.compressedSize)
             buffer.putInt(element.uncompressedSize)
             buffer.putInt(element.fileOffset)
-            buffer.putUShort(archiveName.utf8Length.toUShort()) // TODO: check length?
-            buffer.putString(archiveName)
+            buffer.putUShort(element.archiveName.utf8Length.toUShort()) // TODO: check length?
+            buffer.putString(element.archiveName)
             buffer.putString(element.path)
             buffer.flip()
             fileTableOffset += buffer.limit()

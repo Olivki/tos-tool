@@ -26,11 +26,14 @@ import com.github.ajalt.mordant.animation.progressAnimation
 import com.github.ajalt.mordant.rendering.TextColors.blue
 import com.github.ajalt.mordant.terminal.ConversionResult
 import net.ormr.tos.cli.Sys
+import net.ormr.tos.cli.t
 import net.ormr.tos.ipf.IpfFileBuilder
+import java.nio.file.FileVisitResult
 import java.nio.file.Path
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import kotlin.io.path.*
+import kotlin.system.exitProcess
 
 class IpfPackCommand : CliktCommand(name = "pack") {
     private val input by argument()
@@ -40,7 +43,7 @@ class IpfPackCommand : CliktCommand(name = "pack") {
         .help("Output file")
         .path()
     private val threadsCount by option("-t", "--threads")
-        .help("Number of threads to use")
+        .help("Number of threads to use, will default to half of the available processors")
         .int()
         .defaultLazy { (Sys.availableProcessors / 2).coerceAtLeast(1) }
         .validate {
@@ -59,34 +62,67 @@ class IpfPackCommand : CliktCommand(name = "pack") {
 
     @OptIn(ExperimentalPathApi::class)
     override fun run() {
-        output.createParentDirectories()
+        val inputData = findIpfDataFile(input)
 
-        val ipfData = when {
-            ipfDataFile.notExists() -> {
-                echo("No '.ipf_data' file found in '${input.pathString}'")
+        // TODO: do similar thing for IpfUnpackCommand
+        val directories = if (inputData.exists()) {
+            // then input is a single ipf directory
+            listOf(IpfDirectory(input, loadIpfDataFrom(input)))
+        } else {
+            val ipfDirectories = getAllIpfDirectories(input)
+            if (ipfDirectories.isEmpty()) {
+                // input isn't a direct ipf directory, nor does it contain any ipf directories
+                // at this point we give up and just ask the user for feedback
+                t.danger("Could not find any ipf directories to pack in '${input.pathString}'")
+                val shouldContinue = confirm(
+                    text = "Do you want to turn '${input.name}' into an ipf directory?",
+                    default = true,
+                ) ?: false
+                if (!shouldContinue) exitProcess(1)
                 echo("Please enter the data manually:")
-                val name = archiveNamePrompt() ?: error("Archive name is required")
-                val subversion = uIntPrompt("Subversion") ?: error("Subversion is required")
-                val version = uIntPrompt("Version") ?: error("Version is required")
-                val data = IpfData(name, subversion, version)
+                val data = promptForIpfData()
                 saveIpfDataTo(input, data)
-                data
+                listOf(IpfDirectory(input, data))
+            } else {
+                // then input is a directory containing multiple ipf directories
+                ipfDirectories.map { IpfDirectory(it, loadIpfDataFrom(it)) }
             }
-            else -> loadIpfDataFrom(input)
+        }
+        val isFileTarget: Boolean
+        val target = if (output.name.endsWith(".ipf")) {
+            if (directories.size > 1) {
+                t.danger("Output file name ends with '.ipf', but input contains multiple ipf directories.")
+                t.danger("This is not supported, please specify a directory as output instead.")
+                exitProcess(1)
+            }
+            output.createParentDirectories()
+            isFileTarget = true
+            output
+        } else {
+            // then it's a directory target
+            output.createDirectories()
+            isFileTarget = false
+            output
         }
 
-        val files = input.walk().filter { it.name != ".ipf_data" }.toList()
-        if (files.isEmpty()) {
-            echo("No files found", err = true)
-            return
-        }
-        val fileWord = if (files.size == 1) "file" else "files"
-        echo("Packing ${blue(files.size.toString())} $fileWord using ${blue(threadsCount.toString())} threads...")
-        packFiles(files, ipfData)
+        val fileWord = if (directories.size == 1) "file" else "files"
+        echo("Packing ${blue(directories.size.toString())} $fileWord using ${blue(threadsCount.toString())} threads...")
+        directories.forEach { packIpfDirectory(it, target, isFileTarget) }
         pool.shutdown()
     }
 
-    private fun packFiles(files: List<Path>, data: IpfData) {
+    private fun packIpfDirectory(ipfDirectory: IpfDirectory, target: Path, isFileTarget: Boolean) {
+        val (directory, data) = ipfDirectory
+        val entries = getIpfDirectoryEntries(ipfDirectory)
+        if (entries.isEmpty()) {
+            t.danger("No files found in '${directory.pathString}'")
+            return
+        }
+        val ipfFile = if (isFileTarget) target else target / data.name
+        packEntries(entries, data, ipfFile)
+    }
+
+    private fun packEntries(entries: List<IpfDirectoryEntry>, data: IpfData, ipfFile: Path) {
         val progress = currentContext.terminal.progressAnimation {
             text(blue(data.name))
             percentage()
@@ -95,19 +131,17 @@ class IpfPackCommand : CliktCommand(name = "pack") {
             timeRemaining()
         }
         progress.start()
-        progress.updateTotal(files.sumOf { it.fileSize() })
+        progress.updateTotal(entries.sumOf { it.file.fileSize() })
         val builder = IpfFileBuilder(
-            target = output,
-            root = input,
+            target = ipfFile,
             compressionLevel = level,
-            archiveName = data.name,
             subversion = data.subversion,
             version = data.version,
         )
-        val actions = files.map { file ->
+        val actions = entries.map { entry ->
             Callable {
-                builder.importFile(file)
-                progress.advance(file.fileSize())
+                builder.importFile(entry.file, entry.archive.directory, entry.archive.name)
+                progress.advance(entry.file.fileSize())
             }
         }
         pool.invokeAll(actions)
@@ -115,6 +149,56 @@ class IpfPackCommand : CliktCommand(name = "pack") {
         Thread.sleep(300)
         progress.stop()
     }
+
+    @OptIn(ExperimentalPathApi::class)
+    private fun getIpfDirectoryEntries(ipfDirectory: IpfDirectory): List<IpfDirectoryEntry> = buildList {
+        val (rootDirectory, data) = ipfDirectory
+        val archiveDirectories = ArrayDeque<NamedDirectory>()
+        rootDirectory.visitFileTree {
+            onPreVisitDirectory { directory, _ ->
+                if (directory == rootDirectory) {
+                    archiveDirectories.addFirst(NamedDirectory(data.name, directory))
+                } else if (directory.name.endsWith(".ipf")) {
+                    archiveDirectories.addFirst(NamedDirectory(directory.name, directory))
+                }
+                FileVisitResult.CONTINUE
+            }
+
+            onPostVisitDirectory { directory, _ ->
+                if (directory == rootDirectory || directory.name.endsWith(".ipf")) {
+                    archiveDirectories.removeFirst()
+                }
+                FileVisitResult.CONTINUE
+            }
+
+            onVisitFile { file, _ ->
+                if (file.name != ".ipf_data") {
+                    add(IpfDirectoryEntry(file, archiveDirectories.first()))
+                }
+                FileVisitResult.CONTINUE
+            }
+        }
+    }
+
+    private data class IpfDirectoryEntry(val file: Path, val archive: NamedDirectory)
+
+    private data class NamedDirectory(val name: String, val directory: Path)
+
+    private fun promptForIpfData(): IpfData {
+        val name = archiveNamePrompt() ?: error("Archive name is required")
+        val subversion = uIntPrompt("Subversion") ?: error("Subversion is required")
+        val version = uIntPrompt("Version") ?: error("Version is required")
+        return IpfData(name, subversion, version)
+    }
+
+    private fun getAllIpfDirectories(root: Path): List<Path> = root.useDirectoryEntries { files ->
+        files
+            .filter { it.isDirectory() }
+            .filter { findIpfDataFile(it).exists() }
+            .toList()
+    }
+
+    private fun findIpfDataFile(directory: Path): Path = directory / ".ipf_data"
 
     private fun archiveNamePrompt(): String? = prompt(
         text = "Archive name",
@@ -125,7 +209,7 @@ class IpfPackCommand : CliktCommand(name = "pack") {
                 else -> ConversionResult.Valid(input)
             }
         },
-        default = if (input.name.endsWith(".ipf")) input.name else null,
+        default = if (input.name.endsWith(".ipf")) input.name else "${input.name}.ipf",
     )
 
     private fun uIntPrompt(
@@ -142,4 +226,6 @@ class IpfPackCommand : CliktCommand(name = "pack") {
         },
         default = default,
     )
+
+    private data class IpfDirectory(val directory: Path, val data: IpfData)
 }
