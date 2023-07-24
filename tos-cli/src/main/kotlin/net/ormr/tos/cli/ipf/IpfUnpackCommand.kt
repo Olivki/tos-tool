@@ -82,7 +82,7 @@ class IpfUnpackCommand : CliktCommand(name = "unpack") {
         progress.start()
         progress.updateTotal(ipf.elements.sumOf { it.uncompressedSize.toLong() })
         saveIpfDataTo(rootDirectory, IpfData(archiveName, ipf.subversion, ipf.version))
-        val extractor = IpfExtractor.of(ipf)
+        val extractor = IpfExtractor(ipf)
         pool.invokeAll(ipf.elements.map { element ->
             Callable {
                 with(extractor) {

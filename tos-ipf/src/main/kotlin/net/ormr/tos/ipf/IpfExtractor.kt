@@ -18,20 +18,19 @@ package net.ormr.tos.ipf
 
 import net.ormr.tos.ipf.internal.ENCODED_START_VERSION
 import net.ormr.tos.ipf.internal.Pkware
+import net.ormr.tos.ipf.internal.fileWriteChannel
 import net.ormr.tos.ipf.internal.inflate
 import java.nio.ByteBuffer
 import java.nio.ByteOrder.LITTLE_ENDIAN
-import java.nio.channels.FileChannel
 import java.nio.file.Path
-import java.nio.file.StandardOpenOption.*
 import kotlin.io.path.createParentDirectories
 
-class IpfExtractor @PublishedApi internal constructor(private val ipf: Ipf) {
+class IpfExtractor(private val ipf: Ipf) {
     fun IpfElement.extractTo(rootDirectory: Path) {
         val extractedFile = rootDirectory.resolve(path)
         extractedFile.createParentDirectories()
         val buffer = getByteBufferFrom(this)
-        FileChannel.open(extractedFile, CREATE, WRITE, TRUNCATE_EXISTING).use { it.write(buffer) }
+        extractedFile.fileWriteChannel().use { it.write(buffer) }
     }
 
     private fun getByteBufferFrom(element: IpfElement): ByteBuffer {
@@ -45,16 +44,5 @@ class IpfExtractor @PublishedApi internal constructor(private val ipf: Ipf) {
             element.isCompressed() -> decodedBuffer.inflate(element.uncompressedSize)
             else -> decodedBuffer
         }.order(LITTLE_ENDIAN)
-    }
-
-    companion object {
-        fun of(ipf: Ipf): IpfExtractor = IpfExtractor(ipf)
-
-        inline fun using(
-            ipf: Ipf,
-            action: IpfExtractor.() -> Unit,
-        ) {
-            IpfExtractor(ipf).apply(action)
-        }
     }
 }
