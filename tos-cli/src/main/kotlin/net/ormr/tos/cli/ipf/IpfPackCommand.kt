@@ -58,9 +58,7 @@ class IpfPackCommand : CliktCommand(name = "pack") {
             require(it in 0..9) { "Compression level must be between 0 and 9" }
         }
     private val pool by lazy { Executors.newFixedThreadPool(threadsCount) }
-    private val ipfDataFile by lazy { input / ".ipf_data" }
 
-    @OptIn(ExperimentalPathApi::class)
     override fun run() {
         val inputData = findIpfDataFile(input)
 
