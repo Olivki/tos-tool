@@ -54,7 +54,10 @@ class IesPackCommand : CliktCommand(name = "pack"), IesFormatCommand {
     @OptIn(ExperimentalPathApi::class)
     override fun run() {
         output.createDirectories()
-        val files = input.walk().toList()
+        val files = input
+            .walk()
+            .filter { it.name.endsWith(".${format.fileExtension}") }
+            .toList()
         if (files.isEmpty()) {
             echo("No files found")
             return
