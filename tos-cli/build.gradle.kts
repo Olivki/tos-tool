@@ -32,7 +32,21 @@ application {
     mainClass.set("net.ormr.tos.cli.MainKt")
 }
 
+distributions {
+    this.shadow {
+        distributionBaseName.set("tos")
+    }
+}
+
 tasks {
+    shadowJar {
+        archiveFileName.set("tos.jar")
+    }
+
+    shadowDistZip {
+        archiveFileName.set("tos.zip")
+    }
+
     test {
         useJUnitPlatform()
     }
