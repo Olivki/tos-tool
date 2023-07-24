@@ -47,7 +47,7 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
         if (root.name != "idspace") return null
         val id = root.attr("id")
         val keyID = root.getAttributeValue("keyid")?.let { it.ifEmpty { null } }
-        fillColumnTypes(root, columnTypes)
+        fillColumnTypes(file, root, columnTypes)
         fillColumns(root, columnTypes, columns, tracker)
         val classes = getIesClasses(root, columns, tracker)
         return Ies(
@@ -65,10 +65,10 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
         var useClassID: Boolean = false,
     )
 
-    private fun fillColumnTypes(root: Element, columnTypes: MutableMap<String, IesType<*>>) {
+    private fun fillColumnTypes(file: Path, root: Element, columnTypes: MutableMap<String, IesType<*>>) {
         for (child in root.children) {
             if (child.name != "Class") {
-                fillColumnTypes(child, columnTypes)
+                fillColumnTypes(file, child, columnTypes)
                 continue
             }
             for (attribute in child.attributes) {
@@ -79,7 +79,8 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
 
                 if (type != null) {
                     if (type != currentType) {
-                        error("Type mismatch, expected '$type', but got '$currentType' @ ${getAbsolutePath(attribute)}")
+                        val path = getAbsolutePath(attribute)
+                        error("Type mismatch, expected '$type', but got '$currentType' @ $file -> $path")
                     }
                 } else {
                     columnTypes[name] = currentType
@@ -180,12 +181,15 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
         attr("id", ies.id)
         attr("keyid", ies.keyID ?: "")
         element("Category") {
+            val serializeClassName = !(ies.classes.all { it.className == null })
             for (clz in ies.classes) {
                 element("Class") {
                     if (ies.useClassID) {
                         attr("ClassID", clz.classID)
                     }
-                    attr("ClassName", clz.className ?: DEFAULT_STRING)
+                    if (serializeClassName) {
+                        attr("ClassName", clz.className ?: DEFAULT_STRING)
+                    }
 
                     for (field in clz.fields) {
                         if (field.name == "ClassID" || field.name == "ClassName") continue
