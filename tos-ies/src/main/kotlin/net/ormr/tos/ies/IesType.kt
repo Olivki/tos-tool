@@ -41,10 +41,13 @@ sealed class IesType<T : Any>(val id: UShort) {
         }
 
         fun fromKeyValue(key: String, value: String): IesType<*> = when {
-            key[0] == 'C' && key[1] == 'P' && key[2] == '_' -> CalculatedString
+            key.hasPrefix('C', 'P', '_') -> LocalizedString
             isNumber(value) -> Number
             else -> LocalizedString
         }
+
+        private fun String.hasPrefix(a: Char, b: Char, c: Char): Boolean =
+            this.length >= 3 && this[0] == a && this[1] == b && this[2] == c
 
         private fun isNumber(value: String): Boolean {
             if (value.isEmpty()) return false
