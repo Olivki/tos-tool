@@ -46,12 +46,15 @@ sealed class IesType<T : Any>(val id: UShort) {
             else -> LocalizedString
         }
 
-        // TODO: better way to check if string is a number, this is ugly and hackish
-        private fun isNumber(value: String): Boolean = try {
-            value.toFloat()
-            true
-        } catch (_: NumberFormatException) {
-            false
+        private fun isNumber(value: String): Boolean {
+            if (value.isEmpty()) return false
+            if (value[0] == '-') return true
+            for (char in value) {
+                if (char != ' ' && char != '.' && (char !in '0'..'9')) {
+                    return false
+                }
+            }
+            return true
         }
     }
 }
