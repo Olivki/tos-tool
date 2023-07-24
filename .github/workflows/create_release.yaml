@@ -1,0 +1,41 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: microsoft
+      - run: chmod +x ./gradlew
+        shell: bash
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1.0.4
+      - name: Build CLI Distribution
+        uses: gradle/gradle-build-action@v2.3.3
+        with:
+          arguments: tos-cli:shadowDistZip --stacktrace
+      - name: Generate Changelog
+        id: generate_changelog
+        uses: mikepenz/release-changelog-builder-action@v3.7.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          configuration: "changelog_configuration.json"
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: ${{steps.generate_changelog.outputs.changelog}}
+          files: ./tos-cli/build/distributions/tos.zip
+          fail_on_unmatched_files: true
