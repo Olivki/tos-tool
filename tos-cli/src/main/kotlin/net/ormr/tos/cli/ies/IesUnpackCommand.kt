@@ -72,7 +72,9 @@ class IesUnpackCommand : CliktCommand(name = "unpack"), IesFormatCommand {
 
     private fun unpackFile(file: Path) {
         val ies = IesBinaryReader.readFrom(file)
-        val outputFile = output / "${file.nameWithoutExtension}.${format.fileExtension}"
+        val newPath = "${file.relativeTo(input).pathString.dropLast(4)}.${format.fileExtension}"
+        val outputFile = output / newPath
+        outputFile.createParentDirectories()
         format.writeTo(outputFile, ies)
     }
 
