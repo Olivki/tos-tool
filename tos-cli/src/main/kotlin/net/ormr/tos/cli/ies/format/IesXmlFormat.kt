@@ -37,13 +37,14 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
 
     // TODO: looking at the files we have access to, I don't think the current system does anything with
     //       non standard xml files, so we might not want to support arbitrary nesting?
-    override fun loadFrom(file: Path): Ies {
+    override fun loadFrom(file: Path): Ies? {
         val columns = linkedMapOf<String, IesColumn<*>>()
         val columnTypes = hashMapOf<String, IesType<*>>()
         val tracker = DataTracker()
         val document = loadDocument(file)
         val root = document.rootElement
-        check(root.name == "idspace")
+        // if the loaded file isn't idspace file, we can't pack it, so we return null
+        if (root.name != "idspace") return null
         val id = root.attr("id")
         val keyID = root.getAttributeValue("keyid")?.let { it.ifEmpty { null } }
         fillColumnTypes(root, columnTypes)
