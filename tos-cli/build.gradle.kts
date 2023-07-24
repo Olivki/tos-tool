@@ -56,4 +56,8 @@ tasks {
             jvmTarget = "17"
         }
     }
+
+    processResources {
+        expand("projectVersion" to project.version)
+    }
 }
