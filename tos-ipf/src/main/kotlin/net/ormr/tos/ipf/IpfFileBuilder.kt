@@ -18,19 +18,18 @@ package net.ormr.tos.ipf
 
 import net.ormr.tos.*
 import net.ormr.tos.ipf.internal.*
-import java.nio.ByteBuffer
 import java.nio.ByteOrder.LITTLE_ENDIAN
 import java.nio.channels.FileChannel
 import java.nio.channels.FileChannel.MapMode.READ_ONLY
 import java.nio.file.Path
-import java.nio.file.StandardOpenOption.*
-import java.util.*
+import java.nio.file.StandardOpenOption.READ
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.zip.CRC32
 import kotlin.io.path.name
 import kotlin.io.path.relativeTo
 
 class IpfFileBuilder(
+    target: Path,
     private val root: Path,
     private val compressionLevel: Int,
     private val archiveName: String,
@@ -39,8 +38,9 @@ class IpfFileBuilder(
 ) {
     private val crc = CRC32()
     private val offset = AtomicInteger(0)
-    private val dataEntries: MutableList<Data> = Collections.synchronizedList(mutableListOf())
-    private val lock = LOCK
+    private val elements = mutableListOf<IpfElement>()
+    private val channel = target.fileWriteChannel()
+    private val lock = LOCK()
 
     fun importFile(file: Path) {
         FileChannel.open(file, READ).use { channel ->
@@ -65,62 +65,46 @@ class IpfFileBuilder(
                     path = file.relativeTo(root).joinToString(separator = "\\") { it.name }, // TODO: correct?
                 )
                 offset.addAndGet(encodedBuffer.limit())
-                dataEntries.add(Data(encodedBuffer, element))
+                elements.add(element)
+                this.channel.write(encodedBuffer)
             }
         }
     }
 
-    fun writeTo(target: Path) {
-        FileChannel.open(target, WRITE, CREATE, TRUNCATE_EXISTING).use { channel ->
-            // data
-            forEachDataEntry { (bytes, _) ->
-                //println("bytes: ${bytes.limit()}")
-                channel.write(bytes)
-            }
-
-            // file table
-            var fileTableOffset = offset.get()
-            val buffer = DirectByteBuffer(1044, order = LITTLE_ENDIAN)
-            forEachDataEntry { (_, element) ->
-                buffer.putUShort(element.path.utf8Length.toUShort()) // TODO: check length?
-                buffer.putInt(element.crc)
-                buffer.putInt(element.compressedSize)
-                buffer.putInt(element.uncompressedSize)
-                buffer.putInt(element.fileOffset)
-                buffer.putUShort(archiveName.utf8Length.toUShort()) // TODO: check length?
-                buffer.putString(archiveName)
-                buffer.putString(element.path)
-                buffer.flip()
-                fileTableOffset += buffer.limit()
-                channel.write(buffer)
-                buffer.clear()
-            }
-
-            // data
-            buffer.putUShort(dataEntries.size.toUShort()) // TODO: check size?
-            buffer.putInt(offset.get())
-            buffer.putShort(0)
-            buffer.putInt(fileTableOffset)
-
-            // tail
-            buffer.put(ZIP_MAGIC)
-            buffer.putUInt(subversion)
-            buffer.putUInt(version)
+    fun writeEnd() {
+        // file table
+        var fileTableOffset = offset.get()
+        val buffer = DirectByteBuffer(1044, order = LITTLE_ENDIAN)
+        elements.forEach { element ->
+            buffer.putUShort(element.path.utf8Length.toUShort()) // TODO: check length?
+            buffer.putInt(element.crc)
+            buffer.putInt(element.compressedSize)
+            buffer.putInt(element.uncompressedSize)
+            buffer.putInt(element.fileOffset)
+            buffer.putUShort(archiveName.utf8Length.toUShort()) // TODO: check length?
+            buffer.putString(archiveName)
+            buffer.putString(element.path)
             buffer.flip()
-
+            fileTableOffset += buffer.limit()
             channel.write(buffer)
+            buffer.clear()
         }
+
+        // data
+        buffer.putUShort(elements.size.toUShort()) // TODO: check size?
+        buffer.putInt(offset.get())
+        buffer.putShort(0)
+        buffer.putInt(fileTableOffset)
+
+        // tail
+        buffer.put(ZIP_MAGIC)
+        buffer.putUInt(subversion)
+        buffer.putUInt(version)
+        buffer.flip()
+
+        channel.write(buffer)
+        channel.close()
     }
 
-    private inline fun forEachDataEntry(action: (Data) -> Unit) {
-        synchronized(dataEntries) {
-            for (data in dataEntries) {
-                action(data)
-            }
-        }
-    }
-
-    private object LOCK
-
-    private data class Data(val bytes: ByteBuffer, val element: IpfElement)
+    private class LOCK
 }

@@ -97,6 +97,7 @@ class IpfPackCommand : CliktCommand(name = "pack") {
         progress.start()
         progress.updateTotal(files.sumOf { it.fileSize() })
         val builder = IpfFileBuilder(
+            target = output,
             root = input,
             compressionLevel = level,
             archiveName = data.name,
@@ -110,7 +111,7 @@ class IpfPackCommand : CliktCommand(name = "pack") {
             }
         }
         pool.invokeAll(actions)
-        builder.writeTo(output)
+        builder.writeEnd()
         Thread.sleep(300)
         progress.stop()
     }
