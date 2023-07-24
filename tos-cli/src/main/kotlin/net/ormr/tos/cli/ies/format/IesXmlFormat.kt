@@ -47,7 +47,7 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
         if (root.name != "idspace") return null
         val id = root.attr("id")
         val keyID = root.getAttributeValue("keyid")?.let { it.ifEmpty { null } }
-        fillColumnTypes(root, columnTypes)
+        fillColumnTypes(file, root, columnTypes)
         fillColumns(root, columnTypes, columns, tracker)
         val classes = getIesClasses(root, columns, tracker)
         return Ies(
@@ -60,29 +60,31 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
     }
 
     private class DataTracker(
-        var numbers: UInt = 0u,
-        var strings: UInt = 0u,
+        var numbers: UShort = 0u,
+        var strings: UShort = 0u,
         var useClassID: Boolean = false,
     )
 
-    private fun fillColumnTypes(root: Element, columnTypes: MutableMap<String, IesType<*>>) {
+    private fun fillColumnTypes(file: Path, root: Element, columnTypes: MutableMap<String, IesType<*>>) {
         for (child in root.children) {
             if (child.name != "Class") {
-                fillColumnTypes(child, columnTypes)
+                fillColumnTypes(file, child, columnTypes)
                 continue
             }
             for (attribute in child.attributes) {
                 val name = attribute.name
                 val value = attribute.value
-                val type = columnTypes[name]
-                val currentType = IesType.fromKeyValue(name, value)
+                val cachedType = columnTypes[name]
+                val inferredType = IesType.fromKeyValue(name, value)
 
-                if (type != null) {
-                    if (type != currentType) {
-                        error("Type mismatch, expected '$type', but got '$currentType' @ ${getAbsolutePath(attribute)}")
-                    }
+                if (cachedType == null) {
+                    columnTypes[name] = inferredType
                 } else {
-                    columnTypes[name] = currentType
+                    // if a value we previously inferred as a number is used as a string,
+                    // then it's most likely a string that can contain number values, so we change it accordingly
+                    if (cachedType == IesType.Number && inferredType == IesType.LocalizedString) {
+                        columnTypes[name] = IesType.LocalizedString
+                    }
                 }
             }
         }
@@ -108,7 +110,6 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
                     val kind = IesKind.fromKey(name)
                     val isNT = IesHelper.isNTColumn(name)
                     val stringKey = IesHelper.columnNameToStringKey(name, kind)
-                    // TODO: handle checking for static columns
                     val index = when (type) {
                         IesType.Number -> tracker.numbers++
                         IesType.LocalizedString, IesType.CalculatedString -> tracker.strings++
@@ -122,6 +123,17 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
                         isNT = isNT,
                     )
                 }
+            }
+
+            if ("ClassName" !in columns) {
+                columns["ClassName"] = IesColumn(
+                    stringKey = "ClassName",
+                    name = "ClassName",
+                    type = IesType.LocalizedString,
+                    kind = IesKind.NORMAL,
+                    index = tracker.strings++,
+                    isNT = false,
+                )
             }
         }
     }
@@ -141,11 +153,15 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
                 tracker.useClassID = true
                 it.toUIntOrNull() ?: error("Invalid class ID '$it' @ ${getAbsolutePath(child)}")
             } ?: 0u
+            val hasClassName = child.getAttribute("ClassName") != null
             val className = child
-                .attr("ClassName")
-                .ifEmpty { null }
+                .getAttributeValue("ClassName")
+                ?.ifEmpty { null }
                 ?.let { if (it == DEFAULT_STRING) null else it }
             val fields = buildList(child.attributes.size) {
+                if (!hasClassName) {
+                    add(IesLocalizedString(columns["ClassName"] as IesColumn<IesType.LocalizedString>, null, false))
+                }
                 for (attribute in child.attributes) {
                     val name = attribute.name
                     val value = attribute.value
@@ -180,12 +196,15 @@ class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command 
         attr("id", ies.id)
         attr("keyid", ies.keyID ?: "")
         element("Category") {
+            val serializeClassName = !(ies.classes.all { it.className == null })
             for (clz in ies.classes) {
                 element("Class") {
                     if (ies.useClassID) {
                         attr("ClassID", clz.classID)
                     }
-                    attr("ClassName", clz.className ?: DEFAULT_STRING)
+                    if (serializeClassName) {
+                        attr("ClassName", clz.className ?: DEFAULT_STRING)
+                    }
 
                     for (field in clz.fields) {
                         if (field.name == "ClassID" || field.name == "ClassName") continue

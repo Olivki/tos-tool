@@ -20,13 +20,14 @@ import net.ormr.tos.ies.element.IesClass
 import net.ormr.tos.ies.element.IesField
 import net.ormr.tos.ies.element.IesNumber
 import net.ormr.tos.ies.element.IesStringField
+import java.util.*
 
 class BasicIesFieldFormatter private constructor(private val intLikeNumbers: Set<String>) : IesFieldFormatter {
     override fun formatValue(field: IesField<*, *>): String = when (field) {
         is IesNumber -> when {
-            field.name in intLikeNumbers -> field.value.toInt().toString()
+            isIntLike(field.name) -> field.value.toInt().toString()
             field.value == 0.0F -> DEFAULT_NUMBER
-            else -> field.value.toString()
+            else -> String.format(Locale.ROOT, "%f", field.value)
         }
         is IesStringField<*> -> field.value ?: DEFAULT_STRING
     }

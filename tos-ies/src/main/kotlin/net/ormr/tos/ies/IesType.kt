@@ -41,17 +41,23 @@ sealed class IesType<T : Any>(val id: UShort) {
         }
 
         fun fromKeyValue(key: String, value: String): IesType<*> = when {
-            key[0] == 'C' && key[1] == 'P' && key[2] == '_' -> CalculatedString
+            key.hasPrefix('C', 'P', '_') -> LocalizedString
             isNumber(value) -> Number
             else -> LocalizedString
         }
 
-        // TODO: better way to check if string is a number, this is ugly and hackish
-        private fun isNumber(value: String): Boolean = try {
-            value.toFloat()
-            true
-        } catch (_: NumberFormatException) {
-            false
+        private fun String.hasPrefix(a: Char, b: Char, c: Char): Boolean =
+            this.length >= 3 && this[0] == a && this[1] == b && this[2] == c
+
+        private fun isNumber(value: String): Boolean {
+            if (value.isEmpty()) return false
+            if (value[0] == '-') return true
+            for (char in value) {
+                if (char != ' ' && char != '.' && (char !in '0'..'9')) {
+                    return false
+                }
+            }
+            return true
         }
     }
 }

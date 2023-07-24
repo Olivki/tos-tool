@@ -82,7 +82,9 @@ class IesPackCommand : CliktCommand(name = "pack"), IesFormatCommand {
             }
             return
         }
-        val outputFile = output / "${file.nameWithoutExtension}.ies"
+        val newPath = "${file.relativeTo(input).pathString.dropLast(format.fileExtension.length)}.ies"
+        val outputFile = output / newPath
+        outputFile.createParentDirectories()
         IesBinaryWriter.writeTo(outputFile, ies)
     }
 

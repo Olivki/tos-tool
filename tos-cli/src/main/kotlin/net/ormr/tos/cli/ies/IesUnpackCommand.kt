@@ -54,7 +54,10 @@ class IesUnpackCommand : CliktCommand(name = "unpack"), IesFormatCommand {
     @OptIn(ExperimentalPathApi::class)
     override fun run() {
         output.createDirectories()
-        val files = input.walk().toList()
+        val files = input
+            .walk()
+            .filter { it.name.endsWith(".ies") }
+            .toList()
         if (files.isEmpty()) {
             echo("No files found")
             return
@@ -72,7 +75,9 @@ class IesUnpackCommand : CliktCommand(name = "unpack"), IesFormatCommand {
 
     private fun unpackFile(file: Path) {
         val ies = IesBinaryReader.readFrom(file)
-        val outputFile = output / "${file.nameWithoutExtension}.${format.fileExtension}"
+        val newPath = "${file.relativeTo(input).pathString.dropLast(4)}.${format.fileExtension}"
+        val outputFile = output / newPath
+        outputFile.createParentDirectories()
         format.writeTo(outputFile, ies)
     }
 
