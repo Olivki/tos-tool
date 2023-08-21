@@ -3,15 +3,15 @@
 CLI tool and libraries for working with the various file format that ToS uses, currently supports `ies` and `ipf` files,
 with some mappings done for the `xac` model format.
 
+This tool has not been tested with the live version of the game, and is not intended to be used with it, therefore no
+support will be provided for it.
+
+Note that support for this tool is *not* provided by IMC Games, and is *not* officially supported by them.
+
 **Requires Java 17 or newer to run.**
 
 If unsure of where to easily download Java 17, you can use the Microsoft build of OpenJDK 17, which can be
 downloaded [here](https://learn.microsoft.com/en-us/java/openjdk/download#openjdk-17).
-
-Note that support for this tool is *not* provided by IMC Games, and is *not* officially supported by them.
-
-This tool has not been tested with the live version of the game, and is not intended to be used with it, therefore no
-support will be provided for it.
 
 ### Usage
 
