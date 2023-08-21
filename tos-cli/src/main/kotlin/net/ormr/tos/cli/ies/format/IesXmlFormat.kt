@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:Suppress("NOTHING_TO_INLINE")
-
 package net.ormr.tos.cli.ies.format
 
 import net.ormr.tos.cli.*
@@ -30,6 +28,9 @@ import java.nio.file.Path
 class IesXmlFormat(command: IesFormatCommand) : IesFormat(name = "xml", command = command) {
     override val fileExtension: String
         get() = "xml"
+
+    // Here be dragons, this code is *not* the best, and could definitely be rewritten to be a lot better,
+    // but it works and that's good enough for now.
 
     // the order of the columns don't get kept the *exact* same because we put ClassID and ClassName at the start
     // but that's fine because the order of the columns *shouldn't* matter, as what's important is that
