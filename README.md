@@ -13,7 +13,7 @@ Note that support for this tool is *not* provided by IMC Games, and is *not* off
 ### Usage
 
 Download the latest version from releases and extract it to a safe location, add the `bin` directory to your `PATH` *(or
-the Linux equivalent)*, and you can then invoke the CLI environment by invoking `tos-cli` in your preferred terminal.
+the Linux equivalent)*, and you can then invoke the CLI environment by invoking `tos` in your preferred terminal.
 
 All commands have basic `-h` / `--help` support, which will print out the usage of the command and the available
 options. For example `tos ies unpack -h` will print out all available arguments/options for unpacking an `ies` file.
