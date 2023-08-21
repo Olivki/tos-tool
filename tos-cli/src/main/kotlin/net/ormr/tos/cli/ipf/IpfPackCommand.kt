@@ -47,7 +47,7 @@ class IpfPackCommand : CliktCommand(name = "pack") {
     private val threadsCount by option("-t", "--threads")
         .help("Number of threads to use, will default to half of the available processors")
         .int()
-        .defaultLazy { (Sys.availableProcessors / 2).coerceAtLeast(1) }
+        .default(goodThreadCount)
         .validate {
             require(it > 0) { "Number of threads must be greater than 0" }
             require(it <= Sys.availableProcessors) { "Number of threads can be max ${Sys.availableProcessors}" }

@@ -19,10 +19,7 @@ package net.ormr.tos.cli.ipf
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.help
-import com.github.ajalt.clikt.parameters.options.defaultLazy
-import com.github.ajalt.clikt.parameters.options.help
-import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.validate
+import com.github.ajalt.clikt.parameters.options.*
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.path
 import com.github.ajalt.mordant.animation.progressAnimation
@@ -49,7 +46,7 @@ class IpfUnpackCommand : CliktCommand(name = "unpack") {
     private val threadsCount by option("-t", "--threads")
         .help("Number of threads to use")
         .int()
-        .defaultLazy { (Sys.availableProcessors / 2).coerceAtLeast(1) }
+        .default(goodThreadCount)
         .validate {
             require(it > 0) { "Number of threads must be greater than 0" }
             require(it <= Sys.availableProcessors) { "Number of threads can be max ${Sys.availableProcessors}" }
