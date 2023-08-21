@@ -45,7 +45,7 @@ class IpfPackCommand : CliktCommand(name = "pack") {
         .path()
         .defaultLazy { Path("./packed_ipf/") }
     private val threadsCount by option("-t", "--threads")
-        .help("Number of threads to use, will default to half of the available processors")
+        .help("Number of threads to use, will default to half of the available cores")
         .int()
         .default(goodThreadCount)
         .validate {
