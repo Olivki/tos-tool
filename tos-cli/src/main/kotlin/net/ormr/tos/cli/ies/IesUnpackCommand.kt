@@ -31,6 +31,7 @@ import com.github.ajalt.mordant.animation.textAnimation
 import com.github.ajalt.mordant.rendering.TextColors.blue
 import com.github.ajalt.mordant.rendering.TextColors.gray
 import net.ormr.tos.cli.ies.format.IesXmlFormat
+import net.ormr.tos.cli.setupFormatter
 import net.ormr.tos.cli.t
 import net.ormr.tos.ies.IesBinaryReader
 import java.nio.file.Path
@@ -50,6 +51,10 @@ class IesUnpackCommand : CliktCommand(name = "unpack"), IesFormatCommand {
             "xml" to IesXmlFormat(this),
         )
         .defaultByName("xml")
+
+    init {
+        setupFormatter()
+    }
 
     @OptIn(ExperimentalPathApi::class)
     override fun run() {

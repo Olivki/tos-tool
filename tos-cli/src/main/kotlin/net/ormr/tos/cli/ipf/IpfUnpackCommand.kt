@@ -29,6 +29,7 @@ import com.github.ajalt.mordant.animation.progressAnimation
 import com.github.ajalt.mordant.rendering.TextColors.blue
 import com.github.ajalt.mordant.terminal.ConversionResult
 import net.ormr.tos.cli.Sys
+import net.ormr.tos.cli.setupFormatter
 import net.ormr.tos.cli.t
 import net.ormr.tos.ipf.IpfExtractor
 import net.ormr.tos.ipf.IpfReader
@@ -54,6 +55,10 @@ class IpfUnpackCommand : CliktCommand(name = "unpack") {
             require(it <= Sys.availableProcessors) { "Number of threads can be max ${Sys.availableProcessors}" }
         }
     private val pool by lazy { Executors.newFixedThreadPool(threadsCount) }
+
+    init {
+        setupFormatter()
+    }
 
     @OptIn(ExperimentalPathApi::class)
     override fun run() {

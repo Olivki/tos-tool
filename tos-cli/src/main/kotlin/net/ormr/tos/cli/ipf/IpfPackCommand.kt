@@ -26,6 +26,7 @@ import com.github.ajalt.mordant.animation.progressAnimation
 import com.github.ajalt.mordant.rendering.TextColors.blue
 import com.github.ajalt.mordant.terminal.ConversionResult
 import net.ormr.tos.cli.Sys
+import net.ormr.tos.cli.setupFormatter
 import net.ormr.tos.cli.t
 import net.ormr.tos.ipf.IpfFileBuilder
 import java.nio.file.FileVisitResult
@@ -52,13 +53,17 @@ class IpfPackCommand : CliktCommand(name = "pack") {
             require(it <= Sys.availableProcessors) { "Number of threads can be max ${Sys.availableProcessors}" }
         }
     private val level by option("-l", "--level")
-        .help("Compression level to use")
+        .help("Compression level to use, must be between 0 and 9")
         .int()
         .default(8)
         .validate {
             require(it in 0..9) { "Compression level must be between 0 and 9" }
         }
     private val pool by lazy { Executors.newFixedThreadPool(threadsCount) }
+
+    init {
+        setupFormatter()
+    }
 
     override fun run() {
         val inputData = findIpfDataFile(input)

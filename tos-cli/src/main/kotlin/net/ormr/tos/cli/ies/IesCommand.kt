@@ -17,7 +17,12 @@
 package net.ormr.tos.cli.ies
 
 import com.github.ajalt.clikt.core.CliktCommand
+import net.ormr.tos.cli.setupFormatter
 
 class IesCommand : CliktCommand(name = "ies") {
+    init {
+        setupFormatter()
+    }
+
     override fun run() {}
 }

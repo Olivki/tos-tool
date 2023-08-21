@@ -17,7 +17,22 @@
 package net.ormr.tos.cli
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.context
+import com.github.ajalt.clikt.output.MordantHelpFormatter
 import com.github.ajalt.mordant.terminal.Terminal
 
 val CliktCommand.t: Terminal
     get() = currentContext.terminal
+
+fun CliktCommand.setupFormatter() {
+    context {
+        helpFormatter = {
+            MordantHelpFormatter(
+                context = it,
+                requiredOptionMarker = "*",
+                showDefaultValues = true,
+                showRequiredTag = true,
+            )
+        }
+    }
+}

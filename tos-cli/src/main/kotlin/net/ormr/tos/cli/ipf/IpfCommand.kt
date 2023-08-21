@@ -17,7 +17,12 @@
 package net.ormr.tos.cli.ipf
 
 import com.github.ajalt.clikt.core.CliktCommand
+import net.ormr.tos.cli.setupFormatter
 
 class IpfCommand : CliktCommand(name = "ipf") {
+    init {
+        setupFormatter()
+    }
+
     override fun run() {}
 }
