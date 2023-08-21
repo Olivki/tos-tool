@@ -65,7 +65,7 @@ using XacChunk;
 
 struct Xac {
     XacHeader header;
-    XacChunk chunks[6];
+    XacChunk chunks[6]; // not '6' but rather read until EOF
 } [[inline]];
 
 struct XacHeader {
