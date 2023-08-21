@@ -19,9 +19,6 @@ package net.ormr.tos.cli.ies.format
 import net.ormr.tos.ies.IesKind
 
 object IesHelper {
-    private val kindSuffixes = listOf("CT_", "VP_", "EP_", "CP_")
-    private val ntSuffixes = listOf("_NT", "_NT_DS1", "_NT_DS2")
-
     fun columnNameToStringKey(name: String, kind: IesKind): String {
         var value = name
 
