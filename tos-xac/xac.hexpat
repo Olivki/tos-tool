@@ -1,78 +1,214 @@
 #pragma endian little
-#pragma array_limit 66666665536
-#pragma pattern_limit 1331072
 
 #include <std/mem.pat>
 #include <std/sys.pat>
+#include <std/string.pat>
+
+using XacHeader;
+
+// utility structs
+
+struct BasicString {
+    s32 length;
+    char data[length];
+} [[format("format_basic_string")]];
+
+fn format_basic_string(BasicString string) {
+    return string.data;
+};
+
+struct UV {
+    float u;
+    float v;
+} [[static]];
+
+struct Quaternion {
+    float x;
+    float y;
+    float z;
+    float w;
+} [[static]];
+
+struct Vec3d {
+    float x;
+    float y;
+    float z;
+} [[static]];
+
+struct Matrix44 {
+    Quaternion axes[3];
+    Quaternion position;
+} [[static]];
+
+struct Color {
+    float r;
+    float g;
+    float b;
+    float a;
+} [[static]];
+
+enum ChunkType : s32 {
+    MESH = 1,
+    BONE_INFLUENCES = 2,
+    MATERIAL_DEFINITION = 3,
+    PROPERTIES = 5,
+    METADATA = 7,
+    NODE_HIERARCHY = 11,
+    MORPH_TARGETS = 12,
+    MATERIAL_TOTALS = 13,
+    MAX_CHUNK,
+};
+
+// mappings
 
 using XacChunk;
 
 struct Xac {
-    char magicWord[4];
-    std::assert(magicWord == "XAC ", "Unknown magic word: " + magicWord);
-    u8 unknown[4];
-    XacChunk chunks[while(!std::mem::eof())];
+    XacHeader header;
+    XacChunk chunks[6];
 } [[inline]];
 
-using VertexBlock;
+struct XacHeader {
+    char magicWord[4];
+    std::assert(magicWord == "XAC ", "Unknown magic word: " + magicWord);
+    u8 hiVersion;
+    u8 loVersion;
+    bool isBigEndian;
+    u8 multiplyOrder;
+} [[static]];
 
-struct XacObjectChunk {
-    u32 unknown1;
-    u32 unknown5Count;
-    u32 vertexCount;
-    u32 faceIndexCount;
-    u32 unknown2;
-    u32 vertexBlockCount;
-    u32 unknown3;
-    //padding[vertexCount * 4];
-    VertexBlock blocks[vertexBlockCount];
-    /*u32 faceIndexCount2;
-    u32 vertexCount2;
-    u32 unknown4;
-    u32 unknown5;
-    u32 faceVertexIndices[faceIndexCount2];*/
+struct XacChunkHeader {
+    ChunkType type;
+    s32 length;
+    s32 version;
+} [[static]];
+
+struct XacMetadataHeader { // v2
+    u32 repositionMask;
+    s32 repositioningNode;
+    u8 exporerMajorVersion;
+    u8 exporterMinorVersion;
+    padding[2];
+    float retargetRootOffset;
+} [[static]];
+
+struct XacMetadata {
+    XacMetadataHeader header;
+    BasicString sourceApp;
+    BasicString originalFileName;
+    BasicString exportDate;
+    BasicString actorName;
 };
 
-struct Point {
-    float x;
-    float y;
-    float z;
-} [[static, inline]];
+using XacNode;
 
-struct UV {
-    float u;
-    float v; // maybe has to be inverted
-} [[static, inline]];
+struct XacNodeHierarchy { // v1
+    s32 numNodes;
+    s32 numRootNodes;
+    XacNode nodes[numNodes];
+};
 
-struct VertexBlock {
-    u32 identifier;
-    u32 entrySize;
-    u16 unknown1;
-    u16 unknown2;
-    //u8 data[parent.vertexCount];
+struct XacNode { // v1
+    Quaternion rotation;
+    Quaternion scaleRotation;
+    Vec3d position;
+    Vec3d scale;
+    padding[3 * 4];
+    s32 unknownIndex1;
+    s32 unknownIndex2;
+    s32 parentNodeId;
+    s32 numChildren;
+    s32 includeInBoundsCalc;
+    Matrix44 transform;
+    float importanceFactor;
+    BasicString name;
+};
 
-    match (identifier) {
-        // XYZ
-        (0): Point coordinates[parent.vertexCount];
-        // Normals
-        (1): Point normals[parent.vertexCount];
-        // Texture Coordinates
-        (3): UV coordinates[parent.vertexCount];
-        (5): u32 unknown5Index[parent.vertexCount];
-    }
+struct XacMaterialTotals { // v1
+    s32 numTotalMaterials;
+    s32 numStandardMaterials;
+    s32 numFxMaterials;
+} [[static]];
+
+struct XacMaterialDefinitionHeader { // v2
+    Color ambientColor;
+    Color diffuseColor;
+    Color specularColor;
+    Color emissiveColor;
+    float shine;
+    float shineStrength;
+    float opacity;
+    float ior;
+    bool isDoubleSided;
+    bool isWireframe;
+    padding[1];
+    u8 numLayers;
+} [[static]];
+
+using XacMaterialDefinitionLayer;
+
+struct XacMaterialDefinition { // v2
+    XacMaterialDefinitionHeader header;
+    BasicString name;
+    XacMaterialDefinitionLayer layers[header.numLayers];
+};
+
+struct XacMaterialDefinitionLayer {
+    float amount;
+    UV offset;
+    UV tiling;
+    float rotation; // radians
+    s16 materialId;
+    u8 mapType;
+    padding[1];
+    BasicString texture;
+};
+
+struct XacProperty<T> {
+    T value;
+    BasicString name;
+} [[format("format_property")]];
+
+fn format_property(XacProperty<auto> property) {
+    return property.name.data + " = " + std::string::to_string(property.value);
+};
+
+// because string properties have the order flipped around for some reason
+struct XacStringProperty {
+    BasicString name;
+    BasicString value;
+} [[format("format_string_property")]];
+
+fn format_string_property(XacStringProperty property) {
+    return property.name.data + " = " + std::string::to_string(property.value);
+};
+
+struct XacProperties {
+    s32 intCount;
+    s32 floatCount;
+    s32 maybePadding1; // TODO: padding[4]
+    s32 boolCount;
+    s32 maybePadding2; // TODO: padding[4]
+    s32 stringCount;
+    BasicString name;
+    BasicString fxFileName;
+    BasicString shaderName;
+    XacProperty<s32> intProperties[intCount];
+    XacProperty<float> floatProperties[floatCount];
+    XacProperty<bool> boolProperties[boolCount];
+    XacStringProperty stringProperties[stringCount];
 };
 
 struct XacChunk {
-    u32 identifier;
-    u32 length;
-    u32 version;
+    XacChunkHeader header;
 
-    match (identifier) {
-        (1): XacObjectChunk objectChunks[1];
-        (_): u8 data[length];
+    match (header.type) {
+        (ChunkType::METADATA): XacMetadata data;
+        (ChunkType::NODE_HIERARCHY): XacNodeHierarchy data;
+        (ChunkType::MATERIAL_TOTALS): XacMaterialTotals data;
+        (ChunkType::MATERIAL_DEFINITION): XacMaterialDefinition data;
+        (ChunkType::PROPERTIES): XacProperties data;
     }
 };
 
-//Xac xac @ 0x00;
-
-XacChunk blockChunk @ 0x0000835E;
+Xac xac @ 0x00;
