@@ -10,6 +10,9 @@ downloaded [here](https://learn.microsoft.com/en-us/java/openjdk/download#openjd
 
 Note that support for this tool is *not* provided by IMC Games, and is *not* officially supported by them.
 
+This tool has not been tested with the live version of the game, and is not intended to be used with it, therefore no
+support will be provided for it.
+
 ### Usage
 
 Download the latest version from releases and extract it to a safe location, add the `bin` directory to your `PATH` *(or
