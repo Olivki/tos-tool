@@ -50,6 +50,10 @@ tasks {
         archiveFileName.set("tos.zip")
     }
 
+    withType<CreateStartScripts> {
+        applicationName = "tos"
+    }
+
     test {
         useJUnitPlatform()
     }
