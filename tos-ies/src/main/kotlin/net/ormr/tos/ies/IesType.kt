@@ -38,7 +38,7 @@ sealed class IesType<T : Any>(val id: UShort) {
         }
 
         fun fromKeyValue(key: String, value: String): IesType<*> = when {
-            key.hasPrefix('C', 'P', '_') -> LocalizedString
+            key.hasPrefix('C', 'P', '_') -> CalculatedString
             isNumber(value) -> Number
             else -> LocalizedString
         }
