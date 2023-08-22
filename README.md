@@ -74,8 +74,32 @@ is supported)* files found will be packed.
 ##### xml format
 
 The `xml` format used by `unpack` and `pack` tries to mimic that of the official one, which means that a lot of the data
-is *inferred*, the `kind` of a value is determined by its `key`, and the `type` of the value is determined by its key
-and/or the contents of the value.
+is *inferred*.
+
+First the `key` and `value` is checked to determine an initial type, where it's resolved as follows:
+
+- Does the `key` start with `CP_`?
+-
+    - If yes, then the type is `Calculated String`
+    - If no, then we go to the next step
+- Does `value` start with `-` or only contain the characters `[' ', '.', '0'..'9']`?
+    - If yes, then the type is `Number`
+    - If no, then the type is `Localized String`
+
+If a `value` that was previously inferred to be a `Number` is then found to contain characters other
+than `[' ', '.', '0'..'9']` then the type is changed to `Localized String`.
+
+The `kind` of a `column` is determined by the prefix of its `key`:
+
+- `EP_` -> `EP`
+- `CP_` -> `CP`
+- `VP_` -> `VP`
+- `CT_` -> `CT`
+- Anything else -> `NORMAL`
+
+Whether a `column` is an `NT` column is determined by if its `key` contains `_NT`.
+
+Whether a `field` is a script field is determined by if its `value` contains `SCR_` or `SCP`.
 
 #### ipf
 
