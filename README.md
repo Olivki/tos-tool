@@ -86,8 +86,8 @@ First the `key` and `value` is checked to determine an initial type, where it's 
     - If yes, then the type is `Number`
     - If no, then the type is `Localized String`
 
-If a `value` that was previously inferred to be a `Number` is then found to contain characters other
-than `[' ', '.', '0'..'9']` then the type is changed to `Localized String`.
+If a `value` that was previously inferred to be a `Number` is then inferred to be a `Localized String` then the type is
+changed to `Localized String`. This is because the intial type is just a guess, and can be wrong.
 
 The `kind` of a `column` is determined by the prefix of its `key`:
 
