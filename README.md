@@ -79,7 +79,6 @@ is *inferred*.
 First the `key` and `value` is checked to determine an initial type, where it's resolved as follows:
 
 - Does the `key` start with `CP_`?
--
     - If yes, then the type is `Calculated String`
     - If no, then we go to the next step
 - Does `value` start with `-` or only contain the characters `[' ', '.', '0'..'9']`?
