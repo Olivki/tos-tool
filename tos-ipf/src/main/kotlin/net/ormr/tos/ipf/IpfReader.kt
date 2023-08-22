@@ -30,6 +30,7 @@ import java.nio.file.StandardOpenOption.READ
 
 object IpfReader {
     fun readFrom(file: Path): Ipf = FileChannel.open(file, READ).use { channel ->
+        // TODO: this will fail if the file is bigger than Int.MAX_VALUE
         val buffer = channel.map(READ_ONLY, 0, channel.size()).order(LITTLE_ENDIAN)
         readFrom(buffer)
     }

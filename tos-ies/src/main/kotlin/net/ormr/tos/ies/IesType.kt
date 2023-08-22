@@ -16,9 +16,6 @@
 
 package net.ormr.tos.ies
 
-// CP_ -> Computed Property
-// SP_ -> Static Property
-
 sealed class IesType<T : Any>(val id: UShort) {
     data object Number : IesType<Float>(id = 0u)
     data object LocalizedString : IesType<String>(id = 1u)

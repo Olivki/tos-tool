@@ -18,11 +18,10 @@
 
 package net.ormr.tos.ies
 
-// TODO: better name
 sealed class IesKind(val id: UShort) {
     data object EP : IesKind(id = 0u)
     data object CP : IesKind(id = 1u) // Calculated Property
-    data object VP : IesKind(id = 2u) // Virtual Property
+    data object VP : IesKind(id = 2u)
     data object NORMAL : IesKind(id = 3u)
     data object CT : IesKind(id = 4u)
 

@@ -30,9 +30,6 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption.READ
 
 object IesBinaryReader {
-    // if value starts with SCR_ or SCP it's a script
-    // skip ClassID and ClassName from being automatically serialized to XML
-
     fun readFrom(file: Path): Ies = readIesStruct(file).toIes()
 
     fun readFrom(buffer: ByteBuffer): Ies = readIesStruct(buffer).toIes()
