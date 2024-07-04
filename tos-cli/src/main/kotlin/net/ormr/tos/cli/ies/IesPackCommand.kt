@@ -96,7 +96,7 @@ class IesPackCommand : CliktCommand(name = "pack"), IesFormatCommand {
         IesBinaryWriter.writeTo(outputFile, ies)
     }
 
-    private fun String.dropFormatExtension(): String = dropLast(format.fileExtension.length + 1)
+    private fun String.dropFormatExtension(): String = substringBeforeLast(".${format.fileExtension}")
 
     private data class Progress(val currentFile: String, val total: Int, val current: Int)
 
