@@ -68,7 +68,7 @@ class IesPackCommand : CliktCommand(name = "pack"), IesFormatCommand {
             return
         }
         val progress = t.textAnimation<Progress> {
-            "Unpacking ${blue(it.currentFile)}.. ${gray("(${it.current}/${it.total})")}"
+            "Packing ${blue(it.currentFile)}.. ${gray("(${it.current}/${it.total})")}"
         }
         t.cursor.hide(showOnExit = true)
         val isSingleFile = files.size == 1
@@ -87,10 +87,16 @@ class IesPackCommand : CliktCommand(name = "pack"), IesFormatCommand {
             }
             return
         }
-        val outputFile = output / "${file.name.dropLast(format.fileExtension.length + 1)}.ies"
+        val newPath = when {
+            input.isDirectory() -> "${file.relativeTo(input).pathString.dropFormatExtension()}.ies"
+            else -> "${file.name.dropFormatExtension()}.ies"
+        }
+        val outputFile = output / newPath
         outputFile.createParentDirectories()
         IesBinaryWriter.writeTo(outputFile, ies)
     }
+
+    private fun String.dropFormatExtension(): String = dropLast(format.fileExtension.length + 1)
 
     private data class Progress(val currentFile: String, val total: Int, val current: Int)
 
