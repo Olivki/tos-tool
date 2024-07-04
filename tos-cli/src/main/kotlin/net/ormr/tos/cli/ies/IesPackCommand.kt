@@ -68,7 +68,7 @@ class IesPackCommand : CliktCommand(name = "pack"), IesFormatCommand {
             return
         }
         val progress = t.textAnimation<Progress> {
-            "Unpacking ${blue(it.currentFile)}.. ${gray("(${it.current}/${it.total})")}"
+            "Packing ${blue(it.currentFile)}.. ${gray("(${it.current}/${it.total})")}"
         }
         t.cursor.hide(showOnExit = true)
         val isSingleFile = files.size == 1
