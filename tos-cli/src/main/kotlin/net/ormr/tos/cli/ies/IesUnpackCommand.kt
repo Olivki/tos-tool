@@ -89,7 +89,7 @@ class IesUnpackCommand : CliktCommand(name = "unpack"), IesFormatCommand {
         format.writeTo(outputFile, ies)
     }
 
-    private fun String.dropFormatExtension(): String = substringBeforeLast(".${format.fileExtension}")
+    private fun String.dropFormatExtension(): String = substringBeforeLast(".ies")
 
     private data class Progress(val currentFile: String, val total: Int, val current: Int)
 
