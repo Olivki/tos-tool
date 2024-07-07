@@ -80,11 +80,16 @@ class IesUnpackCommand : CliktCommand(name = "unpack"), IesFormatCommand {
 
     private fun unpackFile(file: Path) {
         val ies = IesBinaryReader.readFrom(file)
-        val newPath = "${file.relativeTo(input).pathString.dropLast(4)}.${format.fileExtension}"
+        val newPath = when {
+            input.isDirectory() -> "${file.relativeTo(input).pathString.dropFormatExtension()}.${format.fileExtension}"
+            else -> "${file.name.dropFormatExtension()}.${format.fileExtension}"
+        }
         val outputFile = output / newPath
         outputFile.createParentDirectories()
         format.writeTo(outputFile, ies)
     }
+
+    private fun String.dropFormatExtension(): String = substringBeforeLast(".${format.fileExtension}")
 
     private data class Progress(val currentFile: String, val total: Int, val current: Int)
 
