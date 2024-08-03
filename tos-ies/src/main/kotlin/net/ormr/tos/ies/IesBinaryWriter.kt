@@ -18,10 +18,7 @@ package net.ormr.tos.ies
 
 import net.ormr.tos.*
 import net.ormr.tos.ies.IesType.*
-import net.ormr.tos.ies.element.Ies
-import net.ormr.tos.ies.element.IesColumn
-import net.ormr.tos.ies.element.IesNumber
-import net.ormr.tos.ies.element.IesStringField
+import net.ormr.tos.ies.element.*
 import net.ormr.tos.ies.internal.*
 import net.ormr.tos.ies.internal.struct.*
 import java.nio.ByteBuffer
@@ -53,18 +50,18 @@ object IesBinaryWriter {
         val columnSize = (columns.size * COLUMN_SIZE).toUInt()
         val numberColumnsCount = columns.count { it.type.isNumber }
         val stringColumnsCount = columns.count { it.type.isString }
-        val classes = classes.mapToArray { clz ->
+        val classes = classes.mapToArrayIndexed { i, clz ->
             val numbers = clz
                 .fields
                 .filterIsInstance<IesNumber>()
                 .mapToFloatArray(IesNumber::value)
             check(numbers.size == numberColumnsCount) {
-                "Size of numbers (${numbers.size}) does not match the size of number columns ($numberColumnsCount)"
+                formatSizeMismatch(clz, columns, numbers.asList(), numberColumnsCount, i, isNumber = true)
             }
             val stringFields = clz.fields.filterIsInstance<IesStringField<*>>()
             val strings = stringFields.mapToArray { it.value ?: "" }
             check(strings.size == stringColumnsCount) {
-                "Size of strings (${strings.size}) does not match the size of string columns ($stringColumnsCount)"
+                formatSizeMismatch(clz, columns, strings.asList(), stringColumnsCount, i, isNumber = false)
             }
             val usesScriptFunctions = stringFields.mapToBooleanArray(IesStringField<*>::usesScriptFunction)
             IesStructClass(
@@ -93,6 +90,53 @@ object IesBinaryWriter {
             columns = columns,
             classes = classes,
         )
+    }
+
+    private fun <T> Ies.formatSizeMismatch(
+        clz: IesClass,
+        columns: Array<IesStructColumn>,
+        values: List<T>,
+        columnsCount: Int,
+        i: Int,
+        isNumber: Boolean,
+    ): String {
+        val name = if (isNumber) "number" else "string"
+        val fields = when {
+            isNumber -> clz
+                .fields
+                .filterIsInstance<IesNumber>()
+                .map { it.name }
+                .toHashSet()
+            else -> clz
+                .fields
+                .filterIsInstance<IesStringField<*>>()
+                .map { it.name }
+                .toHashSet()
+        }
+        val mappedColumns = columns
+            .filter { if (isNumber) it.type.isNumber else it.type.isString }
+            .map { it.name }
+            .toHashSet()
+        return """
+               Size of $name (${values.size}) does not match the size of $name columns ($columnsCount)
+               @ (id='$id', index=$i, name='${clz.className}')
+               Problem columns: ${getUniques(fields, mappedColumns)}
+               The entry is either missing the problem columns, or it's an unknown column.
+               """.trimIndent()
+    }
+
+    // 'union' doesn't seem to want to actually work properly
+    private fun getUniques(a: Set<String>, b: Set<String>): Set<String> {
+        val result = when {
+            a.size > b.size -> a.toHashSet()
+            else -> b.toHashSet()
+        }
+
+        for (field in a) {
+            if (field in b) result -= field
+        }
+
+        return result
     }
 
     private fun IesColumn<*>.toIesStructColumn(): IesStructColumn = IesStructColumn(

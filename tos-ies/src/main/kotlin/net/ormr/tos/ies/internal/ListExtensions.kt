@@ -19,6 +19,9 @@ package net.ormr.tos.ies.internal
 internal inline fun <T, reified R> List<T>.mapToArray(transform: (T) -> R): Array<R> =
     Array(size) { transform(get(it)) }
 
+internal inline fun <T, reified R> List<T>.mapToArrayIndexed(transform: (Int, T) -> R): Array<R> =
+    Array(size) { transform(it, get(it)) }
+
 internal inline fun <T> List<T>.mapToFloatArray(transform: (T) -> Float): FloatArray =
     FloatArray(size) { transform(get(it)) }
 
