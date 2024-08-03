@@ -100,6 +100,10 @@ Whether a `column` is an `NT` column is determined by if its `key` contains `_NT
 
 Whether a `field` is a script field is determined by if its `value` contains `SCR_` or `SCP`.
 
+"Optional" columns are *not* supported, that means that if *one* entry has, say column, `CoolLevel`, but no other entry
+in the same xml file has that column, the conversion *will fail*. To fix this, either remove `CoolLevel` from the entry
+that has it, or add `CoolLevel` to *every* entry in the xml file.
+
 #### ipf
 
 Handles the `ipf` file format, which is a proprietary format used by ToS for storing game data and assets.
