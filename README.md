@@ -76,6 +76,11 @@ is supported)* files found will be packed.
 The `xml` format used by `unpack` and `pack` tries to mimic that of the official one, which means that a lot of the data
 is *inferred*.
 
+Note that "optional" columns are *not* supported, that means that if *one* entry has, say column, `CoolLevel`, but no
+other entry
+in the same xml file has that column, the conversion *will fail*. To fix this, either remove `CoolLevel` from the entry
+that has it, or add `CoolLevel` to *every* entry in the xml file.
+
 First the `key` and `value` is checked to determine an initial type, where it's resolved as follows:
 
 - Does the `key` start with `CP_`?
@@ -99,10 +104,6 @@ The `kind` of a `column` is determined by the prefix of its `key`:
 Whether a `column` is an `NT` column is determined by if its `key` contains `_NT`.
 
 Whether a `field` is a script field is determined by if its `value` contains `SCR_` or `SCP`.
-
-"Optional" columns are *not* supported, that means that if *one* entry has, say column, `CoolLevel`, but no other entry
-in the same xml file has that column, the conversion *will fail*. To fix this, either remove `CoolLevel` from the entry
-that has it, or add `CoolLevel` to *every* entry in the xml file.
 
 #### ipf
 
